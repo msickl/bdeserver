@@ -1,7 +1,6 @@
-// src/stores/websocket.js
 import { defineStore } from 'pinia';
 
-class WebSocketClient {
+export default class WebSocketClient {
   constructor(url, onMessageCallback) {
     this.url = url;
     this.websocket = null;

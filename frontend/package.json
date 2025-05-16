@@ -1,70 +1,20 @@
 {
   "name": "frontend",
-  "version": "0.1.0",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@vue/cli-plugin-eslint": "^3.12.1",
-    "ajv": "latest",
-    "axios": "latest",
-    "bootstrap": "latest",
-    "braces": "^3.0.3",
-    "core-js": "latest",
-    "cross-spawn": "^7.0.6",
-    "eslint": "^9.26.0",
-    "lru-cache": "latest",
-    "pinia": "latest",
-    "thread-loader": "^4.0.4",
-    "vue": "^3.5.14",
-    "vue-router": "latest",
-    "vuex": "latest"
+    "bootstrap": "^5.3.6",
+    "pinia": "^3.0.2",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.27.1",
-    "@babel/preset-env": "^7.27.2",
-    "@vue/cli-plugin-babel": "^3.12.1",
-    "@vue/cli-service": "^5.0.8",
-    "@vue/compiler-sfc": "latest",
-    "babel-loader": "^10.0.0",
-    "css-loader": "^7.1.2",
-    "eslint-plugin-vue": "latest",
-    "file-loader": "^6.2.0",
-    "style-loader": "^4.0.0",
-    "vue-loader": "^17.4.2",
-    "webpack": "^5.99.8",
-    "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.1"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "@babel/eslint-parser"
-    },
-    "globals": {
-      "bootstrap": "readonly"
-    },
-    "rules": {}
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead",
-    "not ie 11"
-  ],
-  "description": "## Project setup ``` npm install ```",
-  "main": "babel.config.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+    "@vitejs/plugin-vue": "^5.2.3",
+    "vite": "^6.3.5"
+  }
 }
