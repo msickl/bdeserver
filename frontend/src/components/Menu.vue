@@ -8,7 +8,7 @@
         <br />
         <button @click="newStockBooking" class="btn btn-primary mt-3 w-100">Buchen</button>
         <br />
-        <button @click="newOrderQueryDialog" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
+        <button @click="openSearch" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
         <br />
         <button @click="newArticleScanDialog" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
       </div>
@@ -145,6 +145,7 @@
 <script>
 export default {
   name: "MenuComponent",
+  emits: ['open-search'],
   data() {
     return {
       menu: {
@@ -159,24 +160,165 @@ export default {
         stock: {},
         items: [],
         groupedItems() {
-          return {}; // Implement your grouping logic here
+          return {}; 
         }
-      },
-      form: {
-        searchDialogSelectedEntry: null
       }
     };
   },
+  props: {
+    searchResult: Object 
+  },
+  watch: {
+    searchResult(newValue) {
+      if (newValue) {
+        console.log('Received in Menu.vue:', newValue);
+      }
+    }
+  },
   methods: {
-    async newArticleScanDialog()
-    {
+    async newArticleScanDialog() {
+      const scannedCode = await this.device?.scanner?.Open('Anmelden');
+      console.log(scannedCode);
+    },
+    
+    async openSearch() {
+      try {
+        //this.form.showLoaderDialog();
+
+        const response = await fetch('/api/order');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const res = await response.json();
+        //this.form.hideLoaderDialog();
+
+        if (res.status === 'success' && res.data?.length > 0) {
+          // Emit data to parent to open Search.vue
+          this.$emit('open-search', res.data);
+        } else {
+          console.error('Error: Unsuccessful response or no data found.');
+        }
+      } catch (error) {
+        console.error('Error during openSearch():', error);
+        //this.form.hideLoaderDialog();
+      }
+    },
+
+    async newOrderQueryDialog() {
+      try {
+        //const form = new Form();
+        //form.showLoaderDialog();
+
+        const response = await fetch(`/api/order`);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const res = await response.json();
+        if (res.status === 'success' && res.data?.length > 0) {
+          //form.hideLoaderDialog();
+          //const entry = await form.showSearchDialog('Auftragssuche', res.data);
+          //console.log('test', entry);
+        } else {
+          console.error('No entries found.');
+        }
+      } catch (error) {
+        console.error('Error fetching order data:', error);
+      }
+    },
+
+    async viewProductInfo() {
+      const scannedCode = await this.device.scanner.Open('Artikel scannen');
+      if (scannedCode === 'scanTimedout' || scannedCode === 'scanClosed') return;
+
+      this.item = new Item();
+
+      //this.form.showLoaderDialog();
+      let res = await this.item.fetch(scannedCode);
+      //this.form.hideLoaderDialog();
+
+      if (res === true) {
+        console.log("Navigation to page 2 - Item loaded successfully.");
+        this.menu.navigate(2);
+      } else {
+        console.log("Navigation to page 3 - Failed to load item.");
+        this.menu.navigate(3);
+      }
+    },
+    async newStockBooking() {
+      this.booking = new Booking();
+
+      const user = new User();
+      await user.fetch(2345);
+      this.booking.addUser(user);
+
+      const stock = new Stock();
+      await stock.fetch(1, 20);
+      this.booking.addStock(stock);
+
+      this.menu.navigate(4);
+    },
+    async addNewStockbookingItem(Id = null) {
+      if (Id == null) {
         const scannedCode = await this.device.scanner.Open('Anmelden');
-        console.log(scannedCode);
+        if (scannedCode === 'scanTimedout' || scannedCode === 'scanClosed') return;
+
+        //this.form.showLoaderDialog();
+        this.booking.addItem(scannedCode);
+        //this.form.hideLoaderDialog();
+      } else {
+        this.booking.addItem(Id);
+      }
+    },
+    async login() {
+      const scannedCode = await this.device.scanner.Open('Anmelden');
+      console.log("Scanned Code:", scannedCode);
+      if (scannedCode) {
+        const obj = JSON.parse(scannedCode);
+
+        const user = new User();
+        if (await user.fetch(obj.userid)) {
+          this.user = user;
+        }
+
+        const stock = new Stock();
+        if (await stock.fetch(obj.stockid, obj.stocklocation)) {
+          this.stock = stock;
+        }
+      }
+    },
+    logout() {
+      this.user = null;
+      this.menu.navigate(1);
+    },
+    async newOrderQueryDialog() {
+      try {
+        //const form = new Form();
+        //form.showLoaderDialog();
+
+        const response = await fetch(`/api/order`);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const res = await response.json();
+        if (res.status === 'success' && res.data && res.data.length > 0) {
+          //form.hideLoaderDialog();
+          //const entry = await form.showSearchDialog('Auftragssuche', res.data);
+          //console.log('test', entry);
+        } else {
+          console.error('Error: Unsuccessful response or missing data.');
+        }
+      } catch (error) {
+        console.error('Error fetching item data:', error);
+      }
+    },
+    async newArticleScanDialog() {
+      // Future implementation
     }
   }
 };
 </script>
 
 <style scoped>
-/* Add styles for your menu here */
+.menu {
+  text-align: left;
+}
 </style>

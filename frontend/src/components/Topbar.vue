@@ -32,13 +32,17 @@ export default {
   name: "TopbarComponent",
   data() {
     return {
-      
+      statusMessage: 'test',
+      showSidebar: false
     };
   },
   methods: {
     // Toggles the login form visibility
     toggleSidebar() {
-      //this.menu.showLoginForm = !this.menu.showLoginForm;
+      this.showSidebar = !this.showSidebar;
+    },
+    isConnected(){
+
     }
   }
 };

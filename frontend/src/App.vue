@@ -1,150 +1,60 @@
 <template>
   <div id="app">
     <TopbarComponent />
-    <MenuComponent />
+    
+    <MenuComponent
+      @open-search="handleOpenSearch"
+      :searchResult="searchResult"
+    />
+
+    <SearchComponent 
+      v-if="showSearch" 
+      :searchData="searchData" 
+      @close="showSearch = false" 
+      @submit="handleSearchResult"
+    />
+
     <ScannerComponent />
-    <SearchComponent />
     <SidebarComponent />
+
     <div class="statusbar">
       <small>J. Zimmer Maschinenbau GmbH</small>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useWebSocketStore } from '@/stores/websocket';
+
 import TopbarComponent from '@/components/Topbar.vue';  
 import MenuComponent from '@/components/Menu.vue';
 import ScannerComponent from '@/components/Scanner.vue';
 import SearchComponent from '@/components/Search.vue';
 import SidebarComponent from '@/components/Sidebar.vue';
 
-import Device from '@/js/device';
-import User from '@/js/user';
-import Menu from '@/js/menu';
-import Stock from './js/stock';
-import Form from './js/form';
-import Booking from './js/booking';
-import Item from './js/item';
+const wsStore = useWebSocketStore();
 
-export default {
-  name: 'App',
-  components: {
-    TopbarComponent,
-    MenuComponent,
-    ScannerComponent,
-    SearchComponent,
-    SidebarComponent
-  },
-  data() {
-    return {
-      device: null,
-      booking: null,
-      menu: null,
-      form: null,
-      item: null,
-      user: null,
-      stock: null
-    };
-  },
-  created() {
-    this.device = new Device("ws://127.0.0.1:8080/ws/");
-    this.menu = new Menu();
-    this.form = new Form();
-  },
-  methods: {
-    async viewProductInfo() {
-      const scannedCode = await this.device.scanner.Open('Artikel scannen');
-      if (scannedCode === 'scanTimedout' || scannedCode === 'scanClosed') return;
+const showSearch = ref(false);
+const searchData = ref(null);
+const searchResult = ref(null);
 
-      this.item = new Item();
-      this.form.showLoaderDialog();
-      let res = await this.item.fetch(scannedCode);
-      this.form.hideLoaderDialog();
+function handleOpenSearch(data) {
+  searchData.value = data;
+  showSearch.value = true;
+}
 
-      if (res === true) {
-        console.log("Navigation to page 2 - Item loaded successfully.");
-        this.menu.navigate(2);
-      } else {
-        console.log("Navigation to page 3 - Failed to load item.");
-        this.menu.navigate(3);
-      }
-    },
-    async newStockBooking() {
-      this.booking = new Booking();
+function handleSearchResult(result) {
+  searchResult.value = result;
+  showSearch.value = false;
+}
 
-      // User
-      const user = new User();
-      await user.fetch(2345);
-      this.booking.addUser(user);
-
-      // Stock
-      const stock = new Stock();
-      await stock.fetch(1, 20);
-      this.booking.addStock(stock);
-
-      this.menu.navigate(4);
-    },
-    async addNewStockbookingItem(Id = null) {
-      if (Id == null) {
-        const scannedCode = await this.device.scanner.Open('Anmelden');
-        if (scannedCode === 'scanTimedout' || scannedCode === 'scanClosed') return;
-
-        this.form.showLoaderDialog();
-        this.booking.addItem(scannedCode);
-        this.form.hideLoaderDialog();
-      } else {
-        this.booking.addItem(Id);
-      }
-    },
-    async login() {
-      const scannedCode = await this.device.scanner.Open('Anmelden');
-      console.log("Scanned Code:", scannedCode);
-      if (scannedCode) {
-        const obj = JSON.parse(scannedCode);
-
-        const user = new User();
-        if (await user.fetch(obj.userid)) {
-          this.user = user;
-        }
-
-        const stock = new Stock();
-        if (await stock.fetch(obj.stockid, obj.stocklocation)) {
-          this.stock = stock;
-        }
-      }
-    },
-    logout() {
-      this.user = null;
-      this.menu.navigate(1);
-    },
-    async newOrderQueryDialog() {
-      try {
-        const form = new Form();
-        form.showLoaderDialog();
-
-        const response = await fetch(`/api/order`);
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-        const res = await response.json();
-        if (res.status === 'success' && res.data && res.data.length > 0) {
-          form.hideLoaderDialog();
-          const entry = await form.showSearchDialog('Auftragssuche', res.data);
-          console.log('test', entry);
-        } else {
-          console.error('Error: Unsuccessful response or missing data.');
-        }
-      } catch (error) {
-        console.error('Error fetching item data:', error);
-      }
-    },
-    async newArticleScanDialog() {
-      //const scannedCode = await this.device.scanner.Open('Anmelden');
-    }
-  }
-};
+onMounted(() => {
+  wsStore.initializeWebSocket("ws://127.0.0.1:8080/ws");
+});
 </script>
 
-<style scoped>
+<style>
 body {
   overflow: hidden;
   touch-action: pan-y;
@@ -269,10 +179,6 @@ small {
   height: 50px;
 }
 
-.menu {
-  text-align: left;
-}
-
 .custom-select {
   background-color: #f8f9fa; /* Change to desired color */
   color: #212529; /* Text color */
@@ -319,5 +225,9 @@ small {
 .sidebar .nav-link:hover {
   background-color: #495057;
   border-radius: 4px;
+}
+
+.modal-backdrop {
+  --bs-backdrop-zindex: -1 !important;
 }
 </style>

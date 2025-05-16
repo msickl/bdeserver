@@ -1,13 +1,12 @@
 import { defineStore } from 'pinia';
 
-export default class WebSocketClient {
+class WebSocketClient {
   constructor(url, onMessageCallback) {
     this.url = url;
     this.websocket = null;
     this._connected = false;
     this.onMessageCallback = onMessageCallback;
-    this.callbacks = {}; 
-
+    this.callbacks = {};
     this.connect();
   }
 
@@ -21,38 +20,17 @@ export default class WebSocketClient {
 
     this.websocket.onmessage = (event) => {
       const newResponse = JSON.parse(event.data);
-      console.log("WS: Received message:", event.data);
-    
+      console.log("WS: Received message:", newResponse);
+
       if (newResponse.Id && this.callbacks[newResponse.Id]) {
         const resolveCallback = this.callbacks[newResponse.Id];
-    
-        switch (newResponse.Action) {
-          case 'scanActivated':
-            console.log("SCAN: Scanner activated. Waiting for scan...");
-            break;
-    
-          case 'scanReceived':
-            resolveCallback(newResponse); 
-            delete this.callbacks[newResponse.Id]; 
-            break;
-    
-          case 'scanTimedout':
-            resolveCallback(newResponse);
-            delete this.callbacks[newResponse.Id];
-            break;
-          
-          case 'scanClosed':
-            resolveCallback(newResponse); 
-            delete this.callbacks[newResponse.Id]; 
-            break;
-    
-          default:
-            console.log("WS: Unknown action:", newResponse.Action);
-            break;
-        }
-      } 
-      else if(newResponse.Action == 'scanActivated') {
-        console.log('activate scan');
+
+        resolveCallback(newResponse);
+        delete this.callbacks[newResponse.Id];
+      }
+
+      if (this.onMessageCallback) {
+        this.onMessageCallback(newResponse);
       }
     };
 
@@ -92,9 +70,9 @@ export default class WebSocketClient {
 }
 
 function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0,
-        v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = Math.random() * 16 | 0,
+          v = c === 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
 }
@@ -102,21 +80,26 @@ function generateUUID() {
 export const useWebSocketStore = defineStore('websocket', {
   state: () => ({
     websocketClient: null,
+    lastMessage: null,
   }),
+  getters: {
+    connected: (state) => state.websocketClient?.connected ?? false,
+  },
   actions: {
     initializeWebSocket(url) {
       this.websocketClient = new WebSocketClient(url, this.onMessage);
     },
-    onMessage(data) {
-      console.log('Message received in store:', data);
+    onMessage(message) {
+      console.log('📥 Message received in Pinia store:', message);
+      this.lastMessage = message;
     },
-    sendMessage(payload) {
-      if (this.websocketClient) {
-        return this.websocketClient.send(payload);
+    async sendMessage(payload) {
+      if (this.websocketClient && this.connected) {
+        return await this.websocketClient.send(payload);
+      } else {
+        console.warn('WebSocket not connected');
+        return null;
       }
     },
-    get connected() {
-      return this.websocketClient ? this.websocketClient.connected : false;
-    }
-  },
+  }
 });

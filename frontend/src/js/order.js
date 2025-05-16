@@ -12,7 +12,7 @@ export default class Order {
             this.form = new Form();
             this.form.showLoaderDialog();
 
-            const response = await fetch(`/api/order`);    
+            const response = await fetch(`https://bde1.zimmer.local/api/order`);    
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
