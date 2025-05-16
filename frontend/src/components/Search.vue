@@ -16,7 +16,7 @@
                 v-for="(entry, index) in searchDialogFilteredData"
                 :key="entry.VORGNR"
                 class="list-group-item"
-                :class="{'bg-success text-white': searchDialogSelectedEntry === entry}"
+                :class="{ 'bg-success text-white': searchDialogSelectedEntry === entry }"
                 @click="selectedSearchEntry(entry)"
               >
                 <div style="font-size: 12pt; text-align: left;">
@@ -47,62 +47,61 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue';
 import { Modal } from 'bootstrap';
 
-export default {
-  name: "SearchComponent",
-  props: {
-    searchData: {
-      type: Array,
-      required: true
-    }
-  },
-  data() {
-    return {
-      searchDialogQuery: '',
-      searchDialogSelectedEntry: null,
-      searchDialogTitle: 'Auftragssuche',
-      modalInstance: null
-    };
-  },
-  computed: {
-    searchDialogFilteredData() {
-      if (!this.searchData) return [];
-      return this.searchData.filter(entry =>
-        (entry.KURZBEZ || '').toLowerCase().includes(this.searchDialogQuery.toLowerCase()) ||
-        (entry.NAME1 || '').toLowerCase().includes(this.searchDialogQuery.toLowerCase()) ||
-        (entry.VORGNR || '').toLowerCase().includes(this.searchDialogQuery.toLowerCase())
-      );
-    }
-  },
-  methods: {
-    selectedSearchEntry(entry) {
-      this.searchDialogSelectedEntry = this.searchDialogSelectedEntry === entry ? null : entry;
-    },
-    confirmedSearchSelection() {
-      this.$emit('submit', this.searchDialogSelectedEntry); 
-      this.closeModal();
-    },
-    closeModal() {
-      this.$emit('close');
-      if (this.modalInstance) {
-        this.modalInstance.hide();
-      }
-    },
-    openModal() {
-      const modalEl = document.getElementById('myModal');
-      if (modalEl) {
-        this.modalInstance = new Modal(modalEl);
-        this.modalInstance.show();
-      }
-    }
-  },
-  mounted() {
-    this.openModal();
+const props = defineProps({
+  searchData: {
+    type: Array,
+    required: true
   }
-};
+});
+
+const emit = defineEmits(['submit', 'close']);
+
+const searchDialogQuery = ref('');
+const searchDialogSelectedEntry = ref(null);
+const searchDialogTitle = ref('Auftragssuche');
+let modalInstance = null;
+
+const searchDialogFilteredData = computed(() => {
+  return (props.searchData || []).filter(entry =>
+    (entry.KURZBEZ || '').toLowerCase().includes(searchDialogQuery.value.toLowerCase()) ||
+    (entry.NAME1 || '').toLowerCase().includes(searchDialogQuery.value.toLowerCase()) ||
+    (entry.VORGNR || '').toLowerCase().includes(searchDialogQuery.value.toLowerCase())
+  );
+});
+
+function selectedSearchEntry(entry) {
+  searchDialogSelectedEntry.value = searchDialogSelectedEntry.value === entry ? null : entry;
+}
+
+function confirmedSearchSelection() {
+  emit('submit', searchDialogSelectedEntry.value);
+  closeModal();
+}
+
+function closeModal() {
+  emit('close');
+  if (modalInstance) {
+    modalInstance.hide();
+  }
+}
+
+function openModal() {
+  const modalEl = document.getElementById('myModal');
+  if (modalEl) {
+    modalInstance = new Modal(modalEl);
+    modalInstance.show();
+  }
+}
+
+onMounted(() => {
+  openModal();
+});
 </script>
+
 
 <style scoped>
 .search .modal .list-group-item {

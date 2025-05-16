@@ -5,6 +5,9 @@
     <MenuComponent
       @open-search="handleOpenSearch"
       :searchResult="searchResult"
+
+      @open-scan="handleOpenScan"
+      :scanResult="scanResult"
     />
 
     <SearchComponent 
@@ -14,7 +17,12 @@
       @submit="handleSearchResult"
     />
 
-    <ScannerComponent />
+    <ScannerComponent 
+      v-if="showScan"
+      :scanTitle="scanTitle"
+      @close="showScan = false" 
+      @submit="handleScanResult"
+    />
     <SidebarComponent />
 
     <div class="statusbar">
@@ -35,6 +43,7 @@ import SidebarComponent from '@/components/Sidebar.vue';
 
 const wsStore = useWebSocketStore();
 
+// Search Component Store
 const showSearch = ref(false);
 const searchData = ref(null);
 const searchResult = ref(null);
@@ -47,6 +56,24 @@ function handleOpenSearch(data) {
 function handleSearchResult(result) {
   searchResult.value = result;
   showSearch.value = false;
+}
+
+// Scan Component Store
+
+const showScan = ref(false);
+const scanTitle = ref(null);
+const scanData = ref(null);
+const scanResult = ref(null);
+
+function handleOpenScan(title)
+{
+  scanTitle.value = title;
+  showScan.value = true;
+}
+
+function handleScanResult(result) {
+  scanData.value = result;
+  showScan.value = false;
 }
 
 onMounted(() => {

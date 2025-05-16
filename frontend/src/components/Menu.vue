@@ -10,7 +10,7 @@
         <br />
         <button @click="openSearch" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
         <br />
-        <button @click="newArticleScanDialog" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
+        <button @click="openScan" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
       </div>
     </div>
 
@@ -145,7 +145,7 @@
 <script>
 export default {
   name: "MenuComponent",
-  emits: ['open-search'],
+  emits: ['open-search', 'open-scan'],
   data() {
     return {
       menu: {
@@ -183,27 +183,25 @@ export default {
     
     async openSearch() {
       try {
-        //this.form.showLoaderDialog();
-
         const response = await fetch('/api/order');
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
         const res = await response.json();
-        //this.form.hideLoaderDialog();
-
         if (res.status === 'success' && res.data?.length > 0) {
-          // Emit data to parent to open Search.vue
           this.$emit('open-search', res.data);
         } else {
           console.error('Error: Unsuccessful response or no data found.');
         }
       } catch (error) {
         console.error('Error during openSearch():', error);
-        //this.form.hideLoaderDialog();
       }
     },
+    async openScan()
+    {
+      this.$emit('open-scan', 'test');
+    },
+
 
     async newOrderQueryDialog() {
       try {
