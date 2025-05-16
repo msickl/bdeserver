@@ -1,0 +1,24 @@
+<div class="topbar">
+<div class="beacon-button" @click="menu.toggleSidebar()">
+    <svg viewBox="0 0 100 100" width="40" height="40">
+        <path class="line top" :class="{ active: menu.showSidebar }" d="M 20,29 H 80" />
+        <path class="line middle" :class="{ active: menu.showSidebar }" d="M 20,50 H 80" />
+        <path class="line bottom" :class="{ active: menu.showSidebar }" d="M 20,71 H 80" />
+    </svg>
+</div>
+<!--
+    <div v-if="data.user" class="user-details">[[ data.user.username ]]</div>
+    <div v-if="data.device.wirelessStrength">
+        <div class="wifi-icon">
+            <div class="wifi-fill" :style="{ width: data.device.wirelessStrength + '%' }"></div>
+            [[ data.device.wirelessStrength ]]%
+        </div>
+    </div>
+    <div v-if="data.device.batteryStatus">
+        <div class="battery-icon">
+            <div class="battery-fill" :style="{ width: data.device.batteryStatus + '%' }"></div>
+                [[ data.device.batteryStatus ]]%
+        </div>
+    </div>
+    -->
+</div>

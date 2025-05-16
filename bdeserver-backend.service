@@ -1,0 +1,11 @@
+[Unit]
+Description=BDEServer Flask Backend
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/bdeserver/backend
+ExecStart=/usr/bin/python3 /opt/bdeserver/backend/run.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

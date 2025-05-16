@@ -1,0 +1,35 @@
+{
+    "mssql" : {
+        "host" : "srv-sql-2\\asuterp",
+        "db" : "Zimmer_Prod",
+        "user" : "sa",
+        "pass" : "TpuQ91gh"
+    },
+    "serialvendors": [
+        {
+            "name": "Festo",
+            "example": "https://bde1.zimmer.local/api/serial?data=https://pk.festo.com/BMRV8G6P0ZD",
+            "pattern": "https://pk\\.festo\\.com/([A-Za-z0-9]+)"
+        },
+        {
+            "name" : "Lenze",
+            "example": "https://bde1.zimmer.local/api/serial?data=1363643811884891004531",
+            "pattern": ".{8}(\\d{14})"
+        },
+        {
+            "name" : "Lenze",
+            "example": "https://bde1.zimmer.local/api/serial?data=AA00014TV001561904AA",
+            "pattern": "(AA.*?AA)"
+        },
+        {
+            "name" : "Zimmer Maschinenbau",
+            "example": "https://bde1.zimmer.local/api/serial?data=A127361",
+            "pattern": "^([AT]\\d{1,6})$"
+        },
+        {
+            "name" : "Cannon Automata",
+            "example": "https://bde1.zimmer.local/api/serial?data=127361",
+            "pattern": "^(\\d{6})$"
+        }
+    ] 
+}
