@@ -1,6 +1,7 @@
 import Item from "./item.js";
 import Stock from "./stock.js";
 import User from "./user.js";
+import Order from "./order.js";
 
 export default class Booking {
     constructor() {
@@ -8,6 +9,7 @@ export default class Booking {
         this.stock = new Stock(),
         this.items = [],
         this.order = null;
+        
     }
 
     addUser(user)
@@ -20,14 +22,28 @@ export default class Booking {
         this.stock = stock;
     }
     
-    async addItem(Id)
+    async addItem(Id = null)
     {
-        const item = new Item();
-        if(await item.fetch(Id))
+        if(Id == null)
         {
-            this.items.push(item);
-            return true;
+            const item = new Item();
+            const res = await item.Scan();
+            if(res)
+            {
+                this.items.push(item);
+                console.log(this.items);
+            }
+            
+        } else {
+            console.log('need to push same id');
         }
+    }
+
+    async addOrder()
+    {
+        const order = new Order();
+        const result = await order.Search();
+        this.order = result;
     }
 
     removeItem(Id)

@@ -1,5 +1,3 @@
-import 'bootstrap'; 
-
 export default class Serial {
     constructor() {
         this.type = null;

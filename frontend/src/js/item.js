@@ -1,4 +1,6 @@
 import Serial from "./serial";
+import { Loader } from '@/composables/LoaderComposable';
+import { useScanStore } from '@/stores/useScanStore';
 
 export default class Item {
     constructor() {
@@ -12,18 +14,20 @@ export default class Item {
         this.unitdesc = null;
         this.serialrequired = null;
         this.serial = null;
+        this.loader = Loader();
+        this.scanStore = useScanStore();
     }
 
     async fetch(id) {
+        this.loader.show();
         try {
             const response = await fetch(`/api/item?id=${encodeURIComponent(id)}`);
                     
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            
+        
             const res = await response.json();
-            console.log("API Response:", res); 
     
             if (res.status === 'success' && res.data && res.data.length > 0) {
                 const itemData = res.data[0];
@@ -37,15 +41,24 @@ export default class Item {
                 this.unitdesc = itemData.ITM_UNIT_DESC;
                 this.serialrequired = itemData.ITM_SERIALREQUIRED;
 
+                this.loader.hide();
                 return true;            
             } else {
                 console.error('Error: Unsuccessful response or missing data.');
+                this.loader.hide();
                 return false;
             }
         } catch (error) {
             console.error('Error fetching item data:', error);
+            this.loader.hide();
             return false;
         }
+    }
+
+    async Scan()
+    {
+        const id = await this.scanStore.scan('Artikel Suchen');
+        return await this.fetch(id);
     }
 
     async addSerial()

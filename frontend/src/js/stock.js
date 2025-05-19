@@ -18,8 +18,7 @@ export default class Stock {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             
-            const stock = await response.json();
-            console.log("API Response:", stock); 
+            const stock = await response.json(); 
 
             if (stock.status === 'success' && stock.data) {
                 const stockData = stock.data;

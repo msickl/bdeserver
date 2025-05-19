@@ -4,7 +4,7 @@
     <div v-if="menu.current === 1" class="menu">
       <h1>Hauptmenü</h1>
       <div>
-        <button @click="viewProductInfo" class="btn btn-primary mt-3 w-100">Produktinformation</button>
+        <button @click="newProductInfo" class="btn btn-primary mt-3 w-100">Produktinformation</button>
         <br />
         <button @click="newStockBooking" class="btn btn-primary mt-3 w-100">Buchen</button>
       </div>
@@ -13,37 +13,37 @@
     <!-- Menu 2 -->
     <div v-if="menu.current === 2" class="menu">
       <h3>Produktinformation</h3>
-      <div v-if="item.id" class="value">
+      <div v-if="pi.item.id" class="value">
         <label class="label-small-gray">Artikelnummer</label>
-        <div>{{ item.id }}</div>
+        <div>{{ pi.item.id }}</div>
       </div>
-      <div v-if="item.var1" class="value">
+      <div v-if="pi.item.var1" class="value">
         <label class="label-small-gray">Bezeichnung 1</label>
-        <div style="font-weight: bold;">{{ item.var1 }}</div>
+        <div style="font-weight: bold;">{{ pi.item.var1 }}</div>
       </div>
-      <div v-if="item.var2" class="value">
+      <div v-if="pi.item.var2" class="value">
         <label class="label-small-gray">Bezeichnung 2</label>
-        <div>{{ item.var2 }}</div>
+        <div>{{ pi.item.var2 }}</div>
       </div>
-      <div v-if="item.var3" class="value">
+      <div v-if="pi.item.var3" class="value">
         <label class="label-small-gray">Bezeichnung 3</label>
-        <div>{{ item.var3 }}</div>
+        <div>{{ pi.item.var3 }}</div>
       </div>
-      <div v-if="item.material" class="value">
+      <div v-if="pi.item.material" class="value">
         <label class="label-small-gray">Werkstoff</label>
-        <div>{{ data.item.material }}</div>
+        <div>{{ pi.item.material }}</div>
       </div>
-      <div v-if="item.standard" class="value">
+      <div v-if="pi.item.standard" class="value">
         <label class="label-small-gray">Norm</label>
-        <div>{{ standard }}</div>
+        <div>{{ pi.item.standard }}</div>
       </div>
-      <div v-if="item.unit" class="value">
+      <div v-if="pi.item.unit" class="value">
         <label class="label-small-gray">Grundeinheit</label>
-        <div>{{ item.unit }}</div>
+        <div>{{ pi.item.unit }}</div>
       </div>
-      <div v-if="item.unitdesc" class="value">
+      <div v-if="pi.item.unitdesc" class="value">
         <label class="label-small-gray">Einheit</label>
-        <div>{{ item.unitdesc }}</div>
+        <div>{{ pi.item.unitdesc }}</div>
       </div>
       <div class="buttons">
         <button @click="menu.navigate(1)" class="btn btn-primary mt-3 w-100">Close</button>
@@ -86,7 +86,7 @@
         </select>
       </div>
       <h3>AUFTRAG</h3>
-      <button @click="openSearchBookingOrderDialog" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
+      <button @click="booking.addOrder()" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
       <div v-if="booking.order" class="value">
         <div v-if="booking.order" class="value">
           <label class="label-small-gray">Auftrag</label>
@@ -100,7 +100,7 @@
       <hr />
       
       <h3>ARTIKEL</h3>
-      <button @click="openScanDialog" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
+      <button @click="booking.addItem()" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
       <!-- 
       <div v-if="booking.items" class="value">
         <div v-for="(group, itemId) in booking.groupedItems()" :key="itemId">
@@ -144,18 +144,11 @@
 
 import { reactive  } from 'vue';
 import Booking from '@/js/booking';
-import { Loader } from '@/composables/LoaderComposable';
-import Item from '../js/item';
+import ProductInfo from '@/js/productinfo';
 
-import { useSearchStore } from '@/stores/useSearchStore';
-import { useScanStore } from '@/stores/useScanStore';
-
-const searchStore = useSearchStore();
-const scanStore = useScanStore();
-
-const item = reactive(new Item());
+const pi = reactive(new ProductInfo());
 const booking = reactive(new Booking());
-const loader = Loader();
+
 
 const menu = reactive({
   current: 1,
@@ -163,6 +156,14 @@ const menu = reactive({
     menu.current = targetMenuId;
   }
 });
+
+async function newProductInfo(){
+  const result = await pi.getItem();
+  if(result)
+  {
+    menu.navigate(2);
+  }
+}
 
 async function openSearchDialog() {
   try {
@@ -184,43 +185,12 @@ async function openSearchDialog() {
   }
 }
 
-async function openSearchBookingOrderDialog() {
-  try {
-    loader.show();
-    const response = await fetch('/api/order');
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    const res = await response.json();
-
-    if (res.status === 'success' && res.data?.length > 0) {
-      loader.hide();
-      const result = await searchStore.search(res.data);
-      console.log('Search result:', result);
-      booking.order = result;
-    } else {
-      console.error('Error: Unsuccessful response or no data found.');
-    }
-  } catch (error) {
-    loader.hide();
-    console.error('Error during openSearch():', error);
-  }
-}
 
 async function openScanDialog() {
   const id = await scanStore.scan('Artikel erfassen');
   console.log('Scanned result:', id);
 }
 
-
-async function viewProductInfo() {
-  const id = await scanStore.scan('Artikel Suchen');
-  loader.show();
-  const res = await item.fetch(id);
-  if(res)
-  {
-    menu.navigate(2);
-    loader.hide();
-  }
-}
 
 async function newStockBooking() {
   await booking.user.fetch(2345);
