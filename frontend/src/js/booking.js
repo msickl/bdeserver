@@ -1,15 +1,17 @@
-import Item from "./item.js";
-import Stock from "./stock.js";
-import User from "./user.js";
-import Order from "./order.js";
+import Item from "@/js/item.js";
+import Stock from "@/js/stock.js";
+import User from "@/js/user.js";
+import Order from "@/js/order.js";
+import Helper from "@/js/helper.js"
+import Serial from "@/js/serial.js"
 
 export default class Booking {
     constructor() {
+        this.guid = new Helper().generateUUID(),
         this.user = new User(),
         this.stock = new Stock(),
         this.items = [],
-        this.order = null;
-        
+        this.order = null
     }
 
     addUser(user)
@@ -28,29 +30,60 @@ export default class Booking {
         {
             const item = new Item();
             const res = await item.Scan();
+
             if(res)
             {
-                this.items.push(item);
-                console.log(this.items);
+                const existingItem = this.items.find(entry => entry.id === item.id);
+                
+                if (existingItem) {
+                    existingItem.count++; 
+                } else {
+                    item.count = 1; 
+                    this.items.push(item);
+                }
             }
-            
         } else {
-            console.log('need to push same id');
+            const existingItem = this.items.find(entry => entry.id === Id);
+            existingItem.count++; 
+        }
+    }
+
+    async addSerial(Id)
+    {
+        const existingItem = this.items.find(entry => entry.id === Id);
+        if (existingItem) {
+            const serial = new Serial();
+            const res = await serial.Scan();
+            if(res)
+            {
+                if (!existingItem.serials) {
+                    existingItem.serials = [];
+                }
+                
+                existingItem.serials.push(serial);
+                console.log(existingItem.serials);
+            }
         }
     }
 
     async addOrder()
     {
         const order = new Order();
-        const result = await order.Search();
-        this.order = result;
+        const res = await order.Search();
+        if(res)
+        {
+            this.order = order;
+        }
+        
     }
 
     removeItem(Id)
     {
-        const indexToRemove = this.items.findIndex(item => item.id === Id);
-        if (indexToRemove !== -1) {
-            this.items.splice(indexToRemove, 1);
+        const existingItem = this.items.find(entry => entry.id === Id);
+        if (existingItem.count == 1) {
+            this.items.splice(existingItem, 1);
+        } else {
+            existingItem.count--;
         }
     }
 

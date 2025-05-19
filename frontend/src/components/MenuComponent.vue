@@ -101,20 +101,20 @@
       
       <h3>ARTIKEL</h3>
       <button @click="booking.addItem()" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
-      <!-- 
+    
       <div v-if="booking.items" class="value">
-        <div v-for="(group, itemId) in booking.groupedItems()" :key="itemId">
+        <div v-for="item in booking.items" :key="item.id">
           <div class="value">
             <label class="label-small-gray">Artikelnummer</label>
-            <div>{{ itemId }}</div>
+            <div>{{ item.id }}</div>
           </div>
-          <div v-if="group[0].var1" class="value">
+          <div v-if="item.var1" class="value">
             <label class="label-small-gray">Bezeichnung 1</label>
-            <div>{{ group[0].var1 }}</div>
+            <div>{{ item.var1 }}</div>
           </div>
-          <div v-if="group[0].var2" class="value">
+          <div v-if="item.var2" class="value">
             <label class="label-small-gray">Bezeichnung 2</label>
-            <div>{{ group[0].var2 }}</div>
+            <div>{{ item.var2 }}</div>
           </div>
           <div>
             <label class="label-small-gray">Anzahl</label>
@@ -123,17 +123,19 @@
                 type="number"
                 id="quantity"
                 class="form-control text-center"
-                v-model="group.length"
+                v-model="item.count"
                 min="0"
-                :max="group.length"
+                :max="item.count"
               />
-              <button @click="booking.removeItem(itemId)" class="btn btn-danger">-</button>
-              <button @click="booking.addItem(itemId)" class="btn btn-success">+</button>
+              <button @click="booking.removeItem(item.id)" class="btn btn-danger">-</button>
+              <button @click="booking.addItem(item.id)" class="btn btn-success">+</button>
             </div>
+          </div>
+          <div v-if="item.serialrequired">
+            <button @click="booking.addSerial(item.id)" class="btn btn-success">Add Serial</button>
           </div>
         </div>
       </div>
-      -->
       <button class="btn btn-success mt-3 w-100">Buchen</button>
       <button @click="menu.navigate(1)" class="btn btn-danger mt-3 w-100">Close</button>
     </div>
@@ -145,6 +147,7 @@
 import { reactive  } from 'vue';
 import Booking from '@/js/booking';
 import ProductInfo from '@/js/productinfo';
+import Serial from '../js/serial';
 
 const pi = reactive(new ProductInfo());
 const booking = reactive(new Booking());
@@ -164,33 +167,6 @@ async function newProductInfo(){
     menu.navigate(2);
   }
 }
-
-async function openSearchDialog() {
-  try {
-    loader.show();
-    const response = await fetch('/api/order');
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    const res = await response.json();
-
-    if (res.status === 'success' && res.data?.length > 0) {
-      loader.hide();
-      const result = await searchStore.search(res.data);
-      console.log('Search result:', result);
-    } else {
-      console.error('Error: Unsuccessful response or no data found.');
-    }
-  } catch (error) {
-    loader.hide();
-    console.error('Error during openSearch():', error);
-  }
-}
-
-
-async function openScanDialog() {
-  const id = await scanStore.scan('Artikel erfassen');
-  console.log('Scanned result:', id);
-}
-
 
 async function newStockBooking() {
   await booking.user.fetch(2345);
