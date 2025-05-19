@@ -6,7 +6,7 @@ class WebSocketClient {
     this.websocket = null;
     this._connected = false;
     this.onMessageCallback = onMessageCallback;
-    this.callbacks = {};
+    this.callbacks = {}; // { Id: { resolve, reject, handler, timeout } }
     this.connect();
   }
 
@@ -21,11 +21,13 @@ class WebSocketClient {
     this.websocket.onmessage = (event) => {
       const newResponse = JSON.parse(event.data);
 
-      if (newResponse.Id && this.callbacks[newResponse.Id]) {
-        const resolveCallback = this.callbacks[newResponse.Id];
+      const { Id } = newResponse;
 
-        resolveCallback(newResponse);
-        delete this.callbacks[newResponse.Id];
+      if (Id && this.callbacks[Id]) {
+        const { handler } = this.callbacks[Id];
+        if (typeof handler === 'function') {
+          handler(newResponse);
+        }
       }
 
       if (this.onMessageCallback) {
@@ -48,21 +50,40 @@ class WebSocketClient {
     return this._connected;
   }
 
-  send(payload) {
+  send(payload, customHandler) {
     return new Promise((resolve, reject) => {
       if (!this._connected) {
         return reject(new Error("WebSocket is not connected"));
       }
 
       const Id = generateUUID();
-      this.callbacks[Id] = resolve;
-
       const messageWithId = { Id, ...payload };
+
+      this.callbacks[Id] = {
+        resolve,
+        reject,
+        handler: (response) => {
+          const { Action, Data } = response;
+          if (Action === 'scanReceived') {
+            delete this.callbacks[Id];
+            resolve(response);
+          } else if (Action === 'scanTimedout') {
+            delete this.callbacks[Id];
+            response.Action = 'scanTimedout';
+            resolve(response);
+          } else if (Action === 'scanClosed') {
+            delete this.callbacks[Id];
+            response.Action = 'scanClosed';
+            resolve(response);
+          }
+        },
+      };
+
       try {
         this.websocket.send(JSON.stringify(messageWithId));
       } catch (error) {
-        reject(error);
         delete this.callbacks[Id];
+        reject(error);
       }
     });
   }
@@ -70,8 +91,8 @@ class WebSocketClient {
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = Math.random() * 16 | 0,
-          v = c === 'x' ? r : (r & 0x3 | 0x8);
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
 }
@@ -92,46 +113,13 @@ export const useWebSocketStore = defineStore('websocket', {
       this.lastMessage = message;
     },
     sendMessage(payload) {
-      console.log("Send Message:", payload);
-
-      return new Promise((resolve, reject) => {
-        if (this.websocketClient && this.connected) {
-          // Send the initial message
-          this.websocketClient.send(payload)
-            .then(() => {
-              // Now start listening for messages
-              const messageListener = (message) => {
-                console.log("Message received:", message);
-
-                // Check for specific actions and handle them
-                if (message.Action === 'scanReceived') {
-                  console.log("Scan completed successfully:", message.Data);
-                  resolve(message.Data); // Resolve the promise once the scan is received
-                } else if (message.Action === 'scanTimedout') {
-                  console.log("Scan timed out:", message.Data);
-                  resolve('scanTimedout'); // Resolve the promise for scan timeout
-                } else if (message.Action === 'scanClosed') {
-                  console.log("Scan closed by user:", message.Data);
-                  resolve('scanClosed'); // Resolve the promise for scan closed
-                } else if (message.Action === 'scanActivated') {
-                  console.log("Scan activated by user:", message.Data);
-                  // You can add more logic here for scanActivated if needed
-                } else {
-                  console.log("Unexpected response action:", message);
-                }
-              };
-
-            })
-            .catch((error) => {
-              console.error("Error while sending message:", error);
-              reject(error); // Reject promise if sending message fails
-            });
-        } else {
-          console.warn('WebSocket not connected');
-          reject(new Error('WebSocket not connected')); // Reject if WebSocket is not connected
-        }
-      });
+      if (this.websocketClient && this.connected) {
+        //console.log("Sending WebSocket Message:", payload);
+        return this.websocketClient.send(payload);
+      } else {
+        console.warn('WebSocket not connected');
+        return Promise.reject(new Error('WebSocket not connected'));
+      }
     },
-  }
+  },
 });
-

@@ -29,21 +29,16 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Modal } from 'bootstrap';
-import { useWebSocketStore } from '@/stores/websocket'; 
+import { useWebSocketStore } from '@/stores/websocket';
 
-const emit = defineEmits(['close']);
-const scannerModal = ref(null);
-let modalInstance = null;
-
-const store = useWebSocketStore(); 
-
+const emit = defineEmits(['submit', 'close']);
 const props = defineProps({
-  scanTitle: {
-    type: String,
-    required: true
-  }
+  scanTitle: String
 });
 
+const scannerModal = ref(null);
+const store = useWebSocketStore();
+let modalInstance = null;
 let isScanRequested = false;
 
 function openModal() {
@@ -52,66 +47,36 @@ function openModal() {
     modalInstance.show();
   }
 
-  return new Promise((resolve) => {
-      if (!isScanRequested) {
-        isScanRequested = true;
-        const payload = {
-          Action: "startScan",
-          Data: null
-        };
-
-        store.sendMessage(payload)
-          .then((response) => {
-            console.log("Final response received:", response); // Log the entire response object
-
-            // Check the received action and log the response for debugging
-            if (response?.Action === 'scanReceived') {
-              console.log("Scan completed successfully:", response.Data);
-              modalInstance.hide();
-              resolve(response.Data);
-            } else if (response?.Action === 'scanTimedout') {
-              console.log("Scan timed out:", response.Data);
-              modalInstance.hide();
-              resolve('scanTimedout');
-            } else if (response?.Action === 'scanClosed') {
-              console.log("Scan closed by user:", response.Data);
-              modalInstance.hide();
-              resolve('scanClosed');
-            } else {
-              console.error("Unexpected response action:", response?.Action);
-              resolve(null); // Handle unexpected action by resolving null or specific fallback
-            }
-          })
-      }
-  });
+  if (!isScanRequested) {
+    isScanRequested = true;
+    store.sendMessage({ Action: 'startScan', Data: null })
+      .then(response => {
+        if (response?.Action === 'scanReceived') {
+          emit('submit', response.Data);
+          closeModal();
+        } else if (response?.Action === 'scanTimedout' || response?.Action === 'scanClosed') {
+          closeModal();
+        } else {
+          console.warn('Unexpected response:', response);
+        }
+      })
+      .catch(error => {
+        console.error('Error during scan:', error);
+        closeModal();
+      });
+  }
 }
-
 
 function closeModal() {
   emit('close');
-
-  const payload = {
-    Action: "closeScan",
-    Data: null
-  };
-
-  store.sendMessage(payload)
-    .catch((error) => {
-      console.error("Error closing scan:", error);
-    });
-
+  store.sendMessage({ Action: 'closeScan', Data: null }).catch(error =>
+    console.error('Error closing scan:', error)
+  );
   isScanRequested = false;
 }
 
-onMounted(() => {
-  openModal();
-});
-
-onBeforeUnmount(() => {
-  if (modalInstance) {
-    modalInstance.dispose();
-  }
-});
+onMounted(openModal);
+onBeforeUnmount(() => modalInstance?.dispose());
 </script>
 
 <style scoped>
