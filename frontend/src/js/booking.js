@@ -38,6 +38,10 @@ export default class Booking {
                 if (existingItem) {
                     existingItem.count++; 
                 } else {
+                    if(item.serialrequired && !item.serials)
+                    {
+                        item.serials = [];
+                    }
                     item.count = 1; 
                     this.items.push(item);
                 }
@@ -66,6 +70,16 @@ export default class Booking {
         }
     }
 
+    async removeSerial(Id, Guid)
+    {
+        const existingItem = this.items.find(entry => entry.id === Id);
+        const existingSerial = existingItem.serials.find(entry => entry.guid === Guid);
+        if(existingSerial)
+        {
+            existingItem.serials.splice(existingSerial, 1);
+        }
+    }
+
     async addOrder()
     {
         const order = new Order();
@@ -85,16 +99,5 @@ export default class Booking {
         } else {
             existingItem.count--;
         }
-    }
-
-    groupedItems() {
-        const groups = {};
-        this.items.forEach(item => {
-            if (!groups[item.id]) {
-                groups[item.id] = [];
-            }
-            groups[item.id].push(item);
-        });
-        return groups;
     }
 }

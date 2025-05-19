@@ -103,7 +103,7 @@
       <button @click="booking.addItem()" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
     
       <div v-if="booking.items" class="value">
-        <div v-for="item in booking.items" :key="item.id">
+        <div v-for="item in booking.items" :key="item.guid">
           <div class="value">
             <label class="label-small-gray">Artikelnummer</label>
             <div>{{ item.id }}</div>
@@ -132,7 +132,16 @@
             </div>
           </div>
           <div v-if="item.serialrequired">
-            <button @click="booking.addSerial(item.id)" class="btn btn-success">Add Serial</button>
+            <div v-for="serial in item.serials" :key="serial.guid" class="serial-item">
+              <div class="input-group">
+                <div class="value">
+                  <label class="label-small-gray">{{ serial.type }}</label>
+                  <div class="serial-number">{{ serial.number }}</div>
+                </div>
+                <button @click="booking.removeSerial(item.id, serial.guid)" class="btn btn-danger remove-btn">-</button>
+              </div>
+            </div>
+            <button v-if="item.count > item.serials.length" @click="booking.addSerial(item.id)" class="btn btn-success add-btn">Add Serial</button>
           </div>
         </div>
       </div>
@@ -193,4 +202,61 @@ async function addNewStockbookingItem(Id = null) {
 .menu {
   text-align: left;
 }
+
+.serial-item {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  margin-top:7px;
+}
+
+.input-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.value {
+  flex-grow: 1;
+}
+
+.label-small-gray {
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.serial-number {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: 5px;
+}
+
+.remove-btn {
+  padding: 6px 12px;
+  font-size: 1.1rem;
+  border-radius: 5px;
+  background-color: #dc3545;
+  color: white;
+}
+
+.remove-btn:hover {
+  background-color: #c82333;
+}
+
+.add-btn {
+  width: 100%; /* Make button full width */
+  padding: 12px;
+  font-size: 1.1rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.add-btn:hover {
+  background-color: #218838;
+}
+
+
 </style>
