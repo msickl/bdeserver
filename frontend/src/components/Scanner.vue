@@ -29,10 +29,13 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Modal } from 'bootstrap';
+import { useWebSocketStore } from '@/stores/websocket'; 
 
 const emit = defineEmits(['close']);
 const scannerModal = ref(null);
 let modalInstance = null;
+
+const store = useWebSocketStore(); 
 
 const props = defineProps({
   scanTitle: {
@@ -41,19 +44,63 @@ const props = defineProps({
   }
 });
 
+let isScanRequested = false;
+
 function openModal() {
   if (scannerModal.value) {
     modalInstance = new Modal(scannerModal.value);
     modalInstance.show();
   }
+
+  return new Promise((resolve) => {
+      if (!isScanRequested) {
+        isScanRequested = true;
+        const payload = {
+          Action: "startScan",
+          Data: null
+        };
+
+        store.sendMessage(payload)
+          .then((response) => {
+            console.log("Final response received:", response); // Log the entire response object
+
+            // Check the received action and log the response for debugging
+            if (response?.Action === 'scanReceived') {
+              console.log("Scan completed successfully:", response.Data);
+              modalInstance.hide();
+              resolve(response.Data);
+            } else if (response?.Action === 'scanTimedout') {
+              console.log("Scan timed out:", response.Data);
+              modalInstance.hide();
+              resolve('scanTimedout');
+            } else if (response?.Action === 'scanClosed') {
+              console.log("Scan closed by user:", response.Data);
+              modalInstance.hide();
+              resolve('scanClosed');
+            } else {
+              console.error("Unexpected response action:", response?.Action);
+              resolve(null); // Handle unexpected action by resolving null or specific fallback
+            }
+          })
+      }
+  });
 }
+
 
 function closeModal() {
   emit('close');
-  document.activeElement?.blur();
-  if (modalInstance) {
-    modalInstance.hide();
-  }
+
+  const payload = {
+    Action: "closeScan",
+    Data: null
+  };
+
+  store.sendMessage(payload)
+    .catch((error) => {
+      console.error("Error closing scan:", error);
+    });
+
+  isScanRequested = false;
 }
 
 onMounted(() => {

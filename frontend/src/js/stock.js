@@ -4,6 +4,7 @@ export default class Stock {
         this.locationid = null;
         this.name = null;
         this.locationname = null;
+        this.operationtype = 1;
     }
 
     async fetch(id, locationid) {

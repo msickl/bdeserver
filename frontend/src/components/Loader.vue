@@ -1,37 +1,36 @@
-<script>
-showLoaderDialog()
-{
-    this.loaderDialog = document.createElement('div');
-    this.loaderDialog.style.position = 'fixed';
-    this.loaderDialog.style.top = '0';
-    this.loaderDialog.style.left = '0';
-    this.loaderDialog.style.width = '100%';
-    this.loaderDialog.style.height = '100%';
-    this.loaderDialog.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
-    this.loaderDialog.style.display = 'flex';
-    this.loaderDialog.style.justifyContent = 'center';
-    this.loaderDialog.style.alignItems = 'center';
-    this.loaderDialog.style.zIndex = '9999';
-
-    const loaderImage = document.createElement('img');
-    loaderImage.src = loaderGif; 
-    loaderImage.alt = 'Loading...';
-    loaderImage.style.width = '100px';
-
-    this.loaderDialog.appendChild(loaderImage);
-    document.body.appendChild(this.loaderDialog); 
-}
-
-hideLoaderDialog()
-{
-    document.body.removeChild(this.loaderDialog);
-}
-</script>
-
 <template>
-
+  <div v-if="loader.showLoader.value" class="loader-dialog">
+    <img src="@/assets/loader.gif" alt="Loading..." class="loader-image" />
+  </div>
 </template>
 
-<style scoped>
+<script setup>
+import { Loader } from '@/composables/Loader'
+import { onMounted } from 'vue'
 
+const loader = Loader()
+
+onMounted(() => {
+  loader.hide()
+})
+</script>
+
+
+<style scoped>
+.loader-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loader-image {
+  width: 100px;
+}
 </style>

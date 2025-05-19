@@ -24,6 +24,7 @@
       @submit="handleScanResult"
     />
     <SidebarComponent />
+    <LoaderComponent />
 
     <div class="statusbar">
       <small>J. Zimmer Maschinenbau GmbH</small>
@@ -40,6 +41,7 @@ import MenuComponent from '@/components/Menu.vue';
 import ScannerComponent from '@/components/Scanner.vue';
 import SearchComponent from '@/components/Search.vue';
 import SidebarComponent from '@/components/Sidebar.vue';
+import LoaderComponent from '@/components/Loader.vue';
 
 const wsStore = useWebSocketStore();
 

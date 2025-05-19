@@ -28,7 +28,7 @@
                     style="font-size: 12pt; padding-top: 5px; margin-top: 5px; border-top: 1px solid #ccc;"
                   >
                     <div>Bezeichnung: {{ entry.BEZ }}</div>
-                    <div>Kundennummer: {{ entry.KUNDR }}</div>
+                    <div>Kundennummer: AD{{ entry.KUNR }}</div>
                     <div>Erstellt am: {{ entry.ERSTELLT }}</div>
                     <div>Liefertermin: {{ entry.LTPROD }}</div>
                     <div>Lieferland: {{ entry.UIDLAND }}</div>

@@ -20,7 +20,6 @@ class WebSocketClient {
 
     this.websocket.onmessage = (event) => {
       const newResponse = JSON.parse(event.data);
-      console.log("WS: Received message:", newResponse);
 
       if (newResponse.Id && this.callbacks[newResponse.Id]) {
         const resolveCallback = this.callbacks[newResponse.Id];
@@ -90,16 +89,49 @@ export const useWebSocketStore = defineStore('websocket', {
       this.websocketClient = new WebSocketClient(url, this.onMessage);
     },
     onMessage(message) {
-      console.log('📥 Message received in Pinia store:', message);
       this.lastMessage = message;
     },
-    async sendMessage(payload) {
-      if (this.websocketClient && this.connected) {
-        return await this.websocketClient.send(payload);
-      } else {
-        console.warn('WebSocket not connected');
-        return null;
-      }
+    sendMessage(payload) {
+      console.log("Send Message:", payload);
+
+      return new Promise((resolve, reject) => {
+        if (this.websocketClient && this.connected) {
+          // Send the initial message
+          this.websocketClient.send(payload)
+            .then(() => {
+              // Now start listening for messages
+              const messageListener = (message) => {
+                console.log("Message received:", message);
+
+                // Check for specific actions and handle them
+                if (message.Action === 'scanReceived') {
+                  console.log("Scan completed successfully:", message.Data);
+                  resolve(message.Data); // Resolve the promise once the scan is received
+                } else if (message.Action === 'scanTimedout') {
+                  console.log("Scan timed out:", message.Data);
+                  resolve('scanTimedout'); // Resolve the promise for scan timeout
+                } else if (message.Action === 'scanClosed') {
+                  console.log("Scan closed by user:", message.Data);
+                  resolve('scanClosed'); // Resolve the promise for scan closed
+                } else if (message.Action === 'scanActivated') {
+                  console.log("Scan activated by user:", message.Data);
+                  // You can add more logic here for scanActivated if needed
+                } else {
+                  console.log("Unexpected response action:", message);
+                }
+              };
+
+            })
+            .catch((error) => {
+              console.error("Error while sending message:", error);
+              reject(error); // Reject promise if sending message fails
+            });
+        } else {
+          console.warn('WebSocket not connected');
+          reject(new Error('WebSocket not connected')); // Reject if WebSocket is not connected
+        }
+      });
     },
   }
 });
+

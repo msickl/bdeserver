@@ -1,9 +1,11 @@
 import Item from "./item.js";
+import Stock from "./stock.js";
+import User from "./user.js";
 
 export default class Booking {
     constructor() {
-        this.user = null,
-        this.stock = null,
+        this.user = new User(),
+        this.stock = new Stock(),
         this.items = [],
         this.order = null;
     }
