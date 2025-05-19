@@ -2,27 +2,23 @@
   <div id="app">
     <TopbarComponent />
     
-    <MenuComponent
-      @open-search="handleOpenSearch"
-      :searchResult="searchResult"
-
-      @open-scan="handleOpenScan"
-      :scanResult="scanResult"
-    />
+    <MenuComponent />
 
     <SearchComponent 
-      v-if="showSearch" 
-      :searchData="searchData" 
-      @close="showSearch = false" 
-      @submit="handleSearchResult"
+      v-if="searchStore.showSearch" 
+      :searchData="searchStore.searchData" 
+      @close="searchStore.showSearch = false" 
+      @submit="searchStore.handleSearchResult"
     />
 
+
     <ScannerComponent 
-      v-if="showScan"
-      :scanTitle="scanTitle"
-      @close="showScan = false" 
-      @submit="handleScanResult"
+      v-if="scanStore.showScan"
+      :scanTitle="scanStore.scanTitle"
+      @close="scanStore.showScan = false" 
+      @submit="scanStore.handleScanResult"
     />
+
     <SidebarComponent />
     <LoaderComponent />
 
@@ -33,54 +29,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, provide } from 'vue';
 import { useWebSocketStore } from '@/stores/websocket';
 
-import TopbarComponent from '@/components/Topbar.vue';  
-import MenuComponent from '@/components/Menu.vue';
-import ScannerComponent from '@/components/Scanner.vue';
-import SearchComponent from '@/components/Search.vue';
-import SidebarComponent from '@/components/Sidebar.vue';
-import LoaderComponent from '@/components/Loader.vue';
+import TopbarComponent from '@/components/TopbarComponent.vue';  
+import MenuComponent from '@/components/MenuComponent.vue';
+
+import { useScanStore } from '@/stores/useScanStore';
+import ScannerComponent from '@/components/ScannerComponent.vue';
+
+import { useSearchStore } from '@/stores/useSearchStore';
+import SearchComponent from '@/components/SearchComponent.vue';
+
+import SidebarComponent from '@/components/SidebarComponent.vue';
+import LoaderComponent from '@/components/LoaderComponent.vue';
 
 const wsStore = useWebSocketStore();
-
-// Search Component Store
-const showSearch = ref(false);
-const searchData = ref(null);
-const searchResult = ref(null);
-
-function handleOpenSearch(data) {
-  searchData.value = data;
-  showSearch.value = true;
-}
-
-function handleSearchResult(result) {
-  searchResult.value = result;
-  showSearch.value = false;
-}
-
-// Scan Component Store
-
-const showScan = ref(false);
-const scanTitle = ref(null);
-const scanData = ref(null);
-const scanResult = ref(null);
-
-function handleOpenScan(title)
-{
-  scanTitle.value = title;
-  showScan.value = true;
-}
-
-function handleScanResult(result) {
-  scanData.value = result;
-  showScan.value = false;
-}
+const searchStore = useSearchStore();
+const scanStore = useScanStore();
 
 onMounted(() => {
   wsStore.initializeWebSocket("ws://127.0.0.1:8080/ws");
 });
+
 </script>
 
 <style>

@@ -7,10 +7,6 @@
         <button @click="viewProductInfo" class="btn btn-primary mt-3 w-100">Produktinformation</button>
         <br />
         <button @click="newStockBooking" class="btn btn-primary mt-3 w-100">Buchen</button>
-        <br />
-        <button @click="openSearchDialog" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
-        <br />
-        <button @click="openScanDialog" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
       </div>
     </div>
 
@@ -90,7 +86,7 @@
         </select>
       </div>
       <h3>AUFTRAG</h3>
-      <button @click="openSearchDialog" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
+      <button @click="openSearchBookingOrderDialog" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
       <div v-if="booking.order" class="value">
         <div v-if="booking.order" class="value">
           <label class="label-small-gray">Auftrag</label>
@@ -146,19 +142,19 @@
 
 <script setup>
 
-import { ref, reactive, watch } from 'vue';
+import { reactive  } from 'vue';
 import Booking from '@/js/booking';
+import { Loader } from '@/composables/LoaderComposable';
+import Item from '../js/item';
 
-import { Loader } from '@/composables/Loader';
+import { useSearchStore } from '@/stores/useSearchStore';
+import { useScanStore } from '@/stores/useScanStore';
 
-const emit = defineEmits(['open-search', 'open-scan']);
+const searchStore = useSearchStore();
+const scanStore = useScanStore();
 
-const props = defineProps({
-  searchResult: Object,
-  scanResult: Object
-});
-
-const booking = new Booking();
+const item = reactive(new Item());
+const booking = reactive(new Booking());
 const loader = Loader();
 
 const menu = reactive({
@@ -167,19 +163,6 @@ const menu = reactive({
     menu.current = targetMenuId;
   }
 });
-
-watch(
-  () => props.searchResult, (value) => {
-    if (value) {
-      booking.order = value;
-    }
-  },
-  () => props.scanResult, (value) => {
-    if(new value) {
-      booking.items.push(value);
-    }
-  }
-);
 
 async function openSearchDialog() {
   try {
@@ -190,7 +173,29 @@ async function openSearchDialog() {
 
     if (res.status === 'success' && res.data?.length > 0) {
       loader.hide();
-      emit('open-search', res.data);
+      const result = await searchStore.search(res.data);
+      console.log('Search result:', result);
+    } else {
+      console.error('Error: Unsuccessful response or no data found.');
+    }
+  } catch (error) {
+    loader.hide();
+    console.error('Error during openSearch():', error);
+  }
+}
+
+async function openSearchBookingOrderDialog() {
+  try {
+    loader.show();
+    const response = await fetch('/api/order');
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    const res = await response.json();
+
+    if (res.status === 'success' && res.data?.length > 0) {
+      loader.hide();
+      const result = await searchStore.search(res.data);
+      console.log('Search result:', result);
+      booking.order = result;
     } else {
       console.error('Error: Unsuccessful response or no data found.');
     }
@@ -201,13 +206,20 @@ async function openSearchDialog() {
 }
 
 async function openScanDialog() {
-  emit('open-scan', 'test');
+  const id = await scanStore.scan('Artikel erfassen');
+  console.log('Scanned result:', id);
 }
 
 
 async function viewProductInfo() {
-  emit('open-scan', 'Produktinformation');
-  menu.navigate(2);
+  const id = await scanStore.scan('Artikel Suchen');
+  loader.show();
+  const res = await item.fetch(id);
+  if(res)
+  {
+    menu.navigate(2);
+    loader.hide();
+  }
 }
 
 async function newStockBooking() {

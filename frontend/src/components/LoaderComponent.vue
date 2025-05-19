@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { Loader } from '@/composables/Loader'
+import { Loader } from '@/composables/LoaderComposable'
 import { onMounted } from 'vue'
 
 const loader = Loader()

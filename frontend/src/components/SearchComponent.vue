@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Modal } from 'bootstrap';
 
 const props = defineProps({
@@ -99,7 +99,18 @@ function openModal() {
 
 onMounted(() => {
   openModal();
+  window.addEventListener('keydown', handleKeyDown);
 });
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+});
+
+function handleKeyDown(event) {
+  if (event.key === 'Escape') {
+    closeModal();
+  }
+}
 </script>
 
 

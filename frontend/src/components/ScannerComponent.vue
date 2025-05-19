@@ -68,6 +68,9 @@ function openModal() {
 }
 
 function closeModal() {
+  if (modalInstance) {
+    modalInstance.hide();
+  }
   emit('close');
   store.sendMessage({ Action: 'closeScan', Data: null }).catch(error =>
     console.error('Error closing scan:', error)
@@ -75,8 +78,19 @@ function closeModal() {
   isScanRequested = false;
 }
 
-onMounted(openModal);
-onBeforeUnmount(() => modalInstance?.dispose());
+onMounted(() => {
+  openModal();
+  window.addEventListener('keydown', handleKeyDown);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+});
+
+function handleKeyDown(event) {
+  if (event.key === 'Escape') {
+    closeModal();
+  }
+}
 </script>
 
 <style scoped>
