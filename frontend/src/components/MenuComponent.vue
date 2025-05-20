@@ -62,9 +62,9 @@
     <!-- Menu 4 Booking -->
     <div v-if="menu.current === 4" class="menu">
       <h3>BENUTZER</h3>
-      <div v-if="booking.user.username" class="value">
+      <div v-if="booking.user.lastname" class="value">
         <label class="label-small-gray">Benutzer</label>
-        <div style="font-weight: bold;">{{ booking.user.username }}</div>
+        <div style="font-weight: bold;">{{ booking.user.lastname }}</div>
       </div>
       <hr />
       <h3>LAGER</h3>

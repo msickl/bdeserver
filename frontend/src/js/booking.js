@@ -71,7 +71,7 @@ export default class Booking {
             }
         } else {
             const notificationModal = useNotificationModalStore();
-            notificationModal.showModal('remove first all serials');
+            notificationModal.showModal('Es muss zuerst eine Seriennummer entfernt werden um einen weiteren Artikel zu löschen.');
         }
     }
 
@@ -90,7 +90,7 @@ export default class Booking {
                     existingItem.serials.push(serial);
                 } else {
                     const notificationModal = useNotificationModalStore();
-                    notificationModal.showModal('Serial already exists');
+                    notificationModal.showModal('Seriennummer existiert bereits.');
                 }
             }
         }
@@ -102,7 +102,12 @@ export default class Booking {
         if (existingItem) {
             const existingSerialIndex = existingItem.serials.findIndex(entry => entry.guid === Guid);
             if (existingSerialIndex !== -1) {
-                existingItem.serials.splice(existingSerialIndex, 1);
+                const confirmationModal = useConfirmationModalStore();
+                const res = await confirmationModal.showModal('Willst du die Seriennummer wirklich löschen ?');
+                if(res)
+                {
+                    existingItem.serials.splice(existingSerialIndex, 1);
+                }
             }
         }
     }
