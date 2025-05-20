@@ -12,40 +12,10 @@
 
     <!-- Menu 2 -->
     <div v-if="menu.current === 2" class="menu">
-      <h3>Produktinformation</h3>
-      <div v-if="pi.item.id" class="value">
-        <label class="label-small-gray">Artikelnummer</label>
-        <div>{{ pi.item.id }}</div>
-      </div>
-      <div v-if="pi.item.var1" class="value">
-        <label class="label-small-gray">Bezeichnung 1</label>
-        <div style="font-weight: bold;">{{ pi.item.var1 }}</div>
-      </div>
-      <div v-if="pi.item.var2" class="value">
-        <label class="label-small-gray">Bezeichnung 2</label>
-        <div>{{ pi.item.var2 }}</div>
-      </div>
-      <div v-if="pi.item.var3" class="value">
-        <label class="label-small-gray">Bezeichnung 3</label>
-        <div>{{ pi.item.var3 }}</div>
-      </div>
-      <div v-if="pi.item.material" class="value">
-        <label class="label-small-gray">Werkstoff</label>
-        <div>{{ pi.item.material }}</div>
-      </div>
-      <div v-if="pi.item.standard" class="value">
-        <label class="label-small-gray">Norm</label>
-        <div>{{ pi.item.standard }}</div>
-      </div>
-      <div v-if="pi.item.unit" class="value">
-        <label class="label-small-gray">Grundeinheit</label>
-        <div>{{ pi.item.unit }}</div>
-      </div>
-      <div v-if="pi.item.unitdesc" class="value">
-        <label class="label-small-gray">Einheit</label>
-        <div>{{ pi.item.unitdesc }}</div>
-      </div>
-      <div class="buttons">
+      <ProductInfoComponent 
+        :data="ProductInfoData"
+      />
+     <div class="buttons">
         <button @click="menu.navigate(1)" class="btn btn-primary mt-3 w-100">Close</button>
       </div>
     </div>
@@ -61,6 +31,8 @@
 
     <!-- Menu 4 Booking -->
     <div v-if="menu.current === 4" class="menu">
+      <Booking />
+      <!--
       <h3>BENUTZER</h3>
       <div v-if="booking.user.lastname" class="value">
         <label class="label-small-gray">Benutzer</label>
@@ -145,19 +117,22 @@
           </div>
         </div>
       </div>
-      <button class="btn btn-success mt-3 w-100">Buchen</button>
+      <button class="btn btn-success mt-3 w-100">Buchen</button> -->
       <button @click="menu.navigate(1)" class="btn btn-danger mt-3 w-100">Close</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive  } from 'vue';
-import Booking from '@/js/booking';
-import ProductInfo from '@/js/productinfo';
+import { ref, reactive  } from 'vue';
+//import Booking from '@/js/booking';
+import Item from '@/js/item';
 
-const pi = reactive(new ProductInfo());
-const booking = reactive(new Booking());
+import ProductInfoComponent from '@/components/Menu/ProductInfoComponent.vue';
+import Booking from '@/components/Menu/Booking.vue';
+
+//const booking = reactive(new Booking());
+const ProductInfoData = ref(null);
 
 const menu = reactive({
   current: 1,
@@ -167,29 +142,18 @@ const menu = reactive({
 });
 
 async function newProductInfo(){
-  const result = await pi.getItem();
-  if(result)
+  const item = new Item();
+  const res = await item.Scan();
+
+  if(res)
   {
+    ProductInfoData.value = item;
     menu.navigate(2);
   }
 }
 
 async function newStockBooking() {
-  await booking.user.fetch(2345);
-  await booking.stock.fetch(1, 20);
-
   menu.navigate(4);
-}
-
-async function addNewStockbookingItem(Id = null) {
-  if (Id === null) {
-    const scannedCode = await device?.scanner?.Open('Anmelden');
-    if (scannedCode === 'scanTimedout' || scannedCode === 'scanClosed') return;
-
-    booking.items.push(scannedCode);
-  } else {
-    booking.items.push(Id);
-  }
 }
 
 </script>
@@ -199,60 +163,4 @@ async function addNewStockbookingItem(Id = null) {
 .menu {
   text-align: left;
 }
-
-.serial-item {
-  padding: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  margin-top:7px;
-}
-
-.input-group {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.value {
-  flex-grow: 1;
-}
-
-.label-small-gray {
-  font-size: 0.9rem;
-  color: #777;
-}
-
-.serial-number {
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-top: 5px;
-}
-
-.remove-btn {
-  padding: 6px 12px;
-  font-size: 1.1rem;
-  border-radius: 5px;
-  background-color: #dc3545;
-  color: white;
-}
-
-.remove-btn:hover {
-  background-color: #c82333;
-}
-
-.add-btn {
-  width: 100%;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  margin-top: 15px;
-}
-
-.add-btn:hover {
-  background-color: #218838;
-}
-
-
 </style>

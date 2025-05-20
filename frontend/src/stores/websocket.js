@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import Helper from "@/js/helper.js";
 
 class WebSocketClient {
   constructor(url, onMessageCallback) {
     this.url = url;
     this.websocket = null;
-    this._connected = false;
+    this._connected = ref(false);
     this.onMessageCallback = onMessageCallback;
-    this.callbacks = {}; // { Id: { resolve, reject, handler, timeout } }
+    this.callbacks = {};
     this.connect();
   }
 
@@ -56,7 +58,7 @@ class WebSocketClient {
         return reject(new Error("WebSocket is not connected"));
       }
 
-      const Id = generateUUID();
+      const Id = new Helper().generateUUID();
       const messageWithId = { Id, ...payload };
 
       this.callbacks[Id] = {
@@ -89,14 +91,6 @@ class WebSocketClient {
   }
 }
 
-function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-
 export const useWebSocketStore = defineStore('websocket', {
   state: () => ({
     websocketClient: null,
@@ -120,6 +114,6 @@ export const useWebSocketStore = defineStore('websocket', {
         console.warn('WebSocket not connected');
         return Promise.reject(new Error('WebSocket not connected'));
       }
-    },
+    }
   },
 });

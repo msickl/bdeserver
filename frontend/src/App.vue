@@ -31,13 +31,14 @@
     />
 
     <div class="statusbar">
+      <div class="connection-dot" :class="{ connected: isConnected, disconnected: !isConnected  }"></div>
       <small>J. Zimmer Maschinenbau GmbH</small>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { ref, onMounted, watchEffect } from 'vue';
 import { useWebSocketStore } from '@/stores/websocket';
 
 import TopbarComponent from '@/components/TopbarComponent.vue';  
@@ -64,6 +65,8 @@ const scanStore = useScanStore();
 const confirmationModalStore = useConfirmationModalStore();
 const notificationModalStore = useNotificationModalStore();
 
+const isConnected = ref(false);
+
 onMounted(() => {
   wsStore.initializeWebSocket("ws://127.0.0.1:8080/ws");
 });
@@ -74,19 +77,6 @@ onMounted(() => {
 body {
   overflow: hidden;
   touch-action: pan-y;
-}
-
-.connection-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-}
-.connected {
-  background-color: green; 
-}
-.disconnected {
-  background-color: red; 
 }
 
 .statusbar {
@@ -245,5 +235,30 @@ small {
 
 .modal-backdrop {
   --bs-backdrop-zindex: -1 !important;
+}
+
+.connection-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.connected {
+  background-color: green; 
+}
+.disconnected {
+  background-color: red; 
+}
+
+.statusbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #6c757d;
+  color: white;
+  padding: 5px;
+  z-index: 1000;
+  text-align: center;
 }
 </style>

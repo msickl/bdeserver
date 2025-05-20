@@ -18,36 +18,23 @@
         <div class="wifi-fill" :style="{ width: data.device.wirelessStrength + '%' }"></div>
       </div>
       -->
-      <!-- Statusbar -->
-    <div class="statusbar">
-      <div class="connection-dot" :class="{ connected: isConnected, disconnected: !isConnected }"></div>
-      <small>{{ statusMessage }}</small>
-    </div>
+    
     </div>
 
 </template>
 
-<script>
-export default {
-  name: "TopbarComponent",
-  data() {
-    return {
-      statusMessage: 'test',
-      showSidebar: false
-    };
-  },
-  methods: {
-    // Toggles the login form visibility
-    toggleSidebar() {
-      this.showSidebar = !this.showSidebar;
-    },
-    isConnected(){
+<script setup>
+import { ref } from 'vue';
+const showSidebar = ref(false);
 
-    }
-  }
+const toggleSidebar = () => {
+  showSidebar.value = !showSidebar.value;
 };
+const isConnected = ref(true);
+
 </script>
 
+
 <style scoped>
-/* Topbar styles */
+
 </style>
