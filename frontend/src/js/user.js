@@ -17,7 +17,6 @@ export default class User {
             });
     
             const responseData = await response.json(); 
-
             this.username = responseData.data.userName;
 
             return true;

@@ -22,6 +22,10 @@
     <SidebarComponent />
     <LoaderComponent />
 
+    <ConfirmationModal />
+    
+    <NotificationModal />
+
     <div class="statusbar">
       <small>J. Zimmer Maschinenbau GmbH</small>
     </div>
@@ -29,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, provide } from 'vue';
+import { onMounted } from 'vue';
 import { useWebSocketStore } from '@/stores/websocket';
 
 import TopbarComponent from '@/components/TopbarComponent.vue';  
@@ -44,9 +48,17 @@ import SearchComponent from '@/components/SearchComponent.vue';
 import SidebarComponent from '@/components/SidebarComponent.vue';
 import LoaderComponent from '@/components/LoaderComponent.vue';
 
+import { useConfirmationModalStore } from '@/stores/useConfirmationModalStore'
+import ConfirmationModal from '@/components/ConfirmationModalComponent.vue'
+
+import { useNotificationModalStore } from '@/stores/useNotificationModalStore'
+import NotificationModal from '@/components/NotificationModalComponent.vue'
+
 const wsStore = useWebSocketStore();
 const searchStore = useSearchStore();
 const scanStore = useScanStore();
+const confirmationModalStore = useConfirmationModalStore();
+const notificationModalStore = useNotificationModalStore();
 
 onMounted(() => {
   wsStore.initializeWebSocket("ws://127.0.0.1:8080/ws");

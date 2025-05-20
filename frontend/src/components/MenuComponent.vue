@@ -103,7 +103,7 @@
       <button @click="booking.addItem()" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
     
       <div v-if="booking.items" class="value">
-        <div v-for="item in booking.items" :key="item.guid">
+        <div v-for="item in booking.items" :key="item.id">
           <div class="value">
             <label class="label-small-gray">Artikelnummer</label>
             <div>{{ item.id }}</div>
@@ -156,7 +156,6 @@
 import { reactive  } from 'vue';
 import Booking from '@/js/booking';
 import ProductInfo from '@/js/productinfo';
-import Serial from '../js/serial';
 
 const pi = reactive(new ProductInfo());
 const booking = reactive(new Booking());
@@ -245,13 +244,12 @@ async function addNewStockbookingItem(Id = null) {
 }
 
 .add-btn {
-  width: 100%; /* Make button full width */
-  padding: 12px;
-  font-size: 1.1rem;
+  width: 100%;
   background-color: #28a745;
   color: white;
   border: none;
   border-radius: 5px;
+  margin-top: 15px;
 }
 
 .add-btn:hover {

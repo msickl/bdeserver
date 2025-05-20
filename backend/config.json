@@ -30,6 +30,11 @@
             "name" : "Cannon Automata",
             "example": "https://bde1.zimmer.local/api/serial?data=127361",
             "pattern": "^(\\d{6})$"
+        },
+        {
+            "name" : "Wago",
+            "example": "https://bde1.zimmer.local/api/serial?data=http://www.wago.com/0750-0600",
+            "pattern": "http:\\/\\/www.wago.com\\/([0-9]{4}-[0-9]{4})"
         }
     ] 
 }

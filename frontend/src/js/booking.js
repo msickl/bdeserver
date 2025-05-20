@@ -4,6 +4,7 @@ import User from "@/js/user.js";
 import Order from "@/js/order.js";
 import Helper from "@/js/helper.js"
 import Serial from "@/js/serial.js"
+import { useModalStore } from '@/stores/useModalStore';
 
 export default class Booking {
     constructor() {
@@ -52,31 +53,54 @@ export default class Booking {
         }
     }
 
-    async addSerial(Id)
-    {
+    removeItem(Id) {
+        const existingItem = this.items.find(entry => entry.id === Id);
+    
+        if (!existingItem) {
+            return; // Item with Id not found
+        }
+        
+        const serialCount = existingItem.serials?.length || 0;
+        
+        if (existingItem.count > serialCount) {
+            if (existingItem.count === 1) {
+                this.items.splice(existingItem, 1);
+            } else {
+                existingItem.count--;
+            }
+        } else {
+            alert('remove first all serials');
+        }
+    }
+
+    async addSerial(Id) {
         const existingItem = this.items.find(entry => entry.id === Id);
         if (existingItem) {
             const serial = new Serial();
             const res = await serial.Scan();
-            if(res)
-            {
+            if (res) {
                 if (!existingItem.serials) {
                     existingItem.serials = [];
                 }
-                
-                existingItem.serials.push(serial);
-                console.log(existingItem.serials);
+                // check if serial already exists (use '===' for comparison)
+                const existingSerialIndex = existingItem.serials.findIndex(entry => entry.number === serial.number);
+                if (existingSerialIndex === -1) {
+                    existingItem.serials.push(serial);
+                } else {
+                    alert('Serial already exists.');
+                }
             }
         }
     }
 
-    async removeSerial(Id, Guid)
-    {
+
+    async removeSerial(Id, Guid) {
         const existingItem = this.items.find(entry => entry.id === Id);
-        const existingSerial = existingItem.serials.find(entry => entry.guid === Guid);
-        if(existingSerial)
-        {
-            existingItem.serials.splice(existingSerial, 1);
+        if (existingItem) {
+            const existingSerialIndex = existingItem.serials.findIndex(entry => entry.guid === Guid);
+            if (existingSerialIndex !== -1) {
+                existingItem.serials.splice(existingSerialIndex, 1);
+            }
         }
     }
 
@@ -89,15 +113,5 @@ export default class Booking {
             this.order = order;
         }
         
-    }
-
-    removeItem(Id)
-    {
-        const existingItem = this.items.find(entry => entry.id === Id);
-        if (existingItem.count == 1) {
-            this.items.splice(existingItem, 1);
-        } else {
-            existingItem.count--;
-        }
     }
 }

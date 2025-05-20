@@ -12,7 +12,7 @@ export default class Item {
         this.material = null;
         this.unit = null;
         this.unitdesc = null;
-        this.serialrequired = null;
+        this.serialrequired = false;
     }
 
     async fetch(id) {
