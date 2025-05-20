@@ -22,9 +22,13 @@
     <SidebarComponent />
     <LoaderComponent />
 
-    <ConfirmationModal />
+    <ConfirmationModal 
+      v-if="confirmationModalStore.isModalVisible"
+    />
     
-    <NotificationModal />
+    <NotificationModal 
+      v-if="notificationModalStore.isModalVisible"
+    />
 
     <div class="statusbar">
       <small>J. Zimmer Maschinenbau GmbH</small>

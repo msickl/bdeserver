@@ -2,9 +2,10 @@ import Item from "@/js/item.js";
 import Stock from "@/js/stock.js";
 import User from "@/js/user.js";
 import Order from "@/js/order.js";
-import Helper from "@/js/helper.js"
-import Serial from "@/js/serial.js"
-import { useModalStore } from '@/stores/useModalStore';
+import Helper from "@/js/helper.js";
+import Serial from "@/js/serial.js";
+import { useConfirmationModalStore } from '@/stores/useConfirmationModalStore';
+import { useNotificationModalStore } from '@/stores/useNotificationModalStore';
 
 export default class Booking {
     constructor() {
@@ -69,7 +70,8 @@ export default class Booking {
                 existingItem.count--;
             }
         } else {
-            alert('remove first all serials');
+            const notificationModal = useNotificationModalStore();
+            notificationModal.showModal('remove first all serials');
         }
     }
 
@@ -87,7 +89,8 @@ export default class Booking {
                 if (existingSerialIndex === -1) {
                     existingItem.serials.push(serial);
                 } else {
-                    alert('Serial already exists.');
+                    const notificationModal = useNotificationModalStore();
+                    notificationModal.showModal('Serial already exists');
                 }
             }
         }

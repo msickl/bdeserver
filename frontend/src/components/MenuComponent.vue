@@ -152,14 +152,12 @@
 </template>
 
 <script setup>
-
 import { reactive  } from 'vue';
 import Booking from '@/js/booking';
 import ProductInfo from '@/js/productinfo';
 
 const pi = reactive(new ProductInfo());
 const booking = reactive(new Booking());
-
 
 const menu = reactive({
   current: 1,
