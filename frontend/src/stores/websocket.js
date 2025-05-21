@@ -48,7 +48,7 @@ class WebSocketClient {
     };
   }
 
-  get connected() {
+  connected() {
     return this._connected;
   }
 
@@ -108,7 +108,6 @@ export const useWebSocketStore = defineStore('websocket', {
     },
     sendMessage(payload) {
       if (this.websocketClient && this.connected) {
-        //console.log("Sending WebSocket Message:", payload);
         return this.websocketClient.send(payload);
       } else {
         console.warn('WebSocket not connected');

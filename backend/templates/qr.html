@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="ZXing for JS">
+
+  <title>ZXing TypeScript | Decoding from camera stream</title>
+
+  <link rel="stylesheet" rel="preload" as="style" onload="this.rel='stylesheet';this.onload=null"
+    href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" rel="preload" as="style" onload="this.rel='stylesheet';this.onload=null"
+    href="https://unpkg.com/normalize.css@8.0.0/normalize.css">
+  <link rel="stylesheet" rel="preload" as="style" onload="this.rel='stylesheet';this.onload=null"
+    href="https://unpkg.com/milligram@1.3.0/dist/milligram.min.css">
+
+<style>
+  .video-container {
+    position: relative;
+    display: inline-block; /* Ensures that the video and canvas are aligned */
+  }
+
+  #video {
+    width: 100%; /* Make video responsive */
+    height: auto;
+  }
+
+  #canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* Make canvas the same size as the video */
+    height: 100%;
+    pointer-events: none; /* Ensure the canvas doesn't interfere with interactions */
+  }
+</style>
+
+
+</head>
+
+<body>
+
+  <main class="wrapper" style="padding-top:2em">
+
+    <section class="container" id="demo-content">
+      <h1 class="title">Scan 1D/2D Code from Video Camera</h1>
+
+      <p>
+        <a class="button-small button-outline" href="../../index.html">HOME 🏡</a>
+      </p>
+
+      <p>This example shows how to scan any supported 1D/2D code with ZXing javascript library from the device video
+        camera. If more
+        than one video input devices are available (for example front and back camera) the example shows how to read
+        them and use a select to change the input device.</p>
+
+      <div>
+        <a class="button" id="startButton">Start</a>
+        <a class="button" id="resetButton">Reset</a>
+      </div>
+
+      <div class="video-container">
+  <video id="video" width="300" height="200" style="border: 1px solid gray"></video>
+  <canvas id="canvas" width="300" height="200" style="pointer-events: none;"></canvas>
+</div>
+
+      <div id="sourceSelectPanel" style="display:none">
+        <label for="sourceSelect">Change video source:</label>
+        <select id="sourceSelect" style="max-width:400px">
+        </select>
+      </div>
+
+      <label>Result:</label>
+      <pre><code id="result"></code></pre>
+
+      <p>See the <a href="https://github.com/zxing-js/library/tree/master/docs/examples/multi-camera/">source code</a>
+        for this example.</p>
+    </section>
+
+    <footer class="footer">
+      <section class="container">
+        <p>ZXing TypeScript Demo. Licensed under the <a target="_blank"
+            href="https://github.com/zxing-js/library#license" title="MIT">MIT</a>.</p>
+      </section>
+    </footer>
+
+  </main>
+
+  <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+  <script type="text/javascript">
+window.addEventListener('load', function () {
+  let selectedDeviceId;
+  const codeReader = new ZXing.BrowserMultiFormatReader();
+  console.log('ZXing code reader initialized');
+  
+  // List video input devices
+  codeReader.listVideoInputDevices()
+    .then((videoInputDevices) => {
+      const sourceSelect = document.getElementById('sourceSelect');
+      selectedDeviceId = videoInputDevices[0].deviceId;
+      
+      if (videoInputDevices.length >= 1) {
+        videoInputDevices.forEach((element) => {
+          const sourceOption = document.createElement('option');
+          sourceOption.text = element.label;
+          sourceOption.value = element.deviceId;
+          sourceSelect.appendChild(sourceOption);
+        });
+
+        sourceSelect.onchange = () => {
+          selectedDeviceId = sourceSelect.value;
+        };
+
+        const sourceSelectPanel = document.getElementById('sourceSelectPanel');
+        sourceSelectPanel.style.display = 'block';
+      }
+
+      document.getElementById('startButton').addEventListener('click', () => {
+        const videoElement = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Ensure canvas resizes with the video element
+        canvas.width = videoElement.offsetWidth;
+        canvas.height = videoElement.offsetHeight;
+
+        // Start the camera stream
+        codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+          // Clear the previous rectangle
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          if (result) {
+            console.log(result);
+            document.getElementById('result').textContent = result.text;
+
+            // Get the points from the result (coordinates of the barcode corners)
+            const points = result.resultPoints;
+
+            if (points.length === 4) {
+              // Get the bounding box of the QR code
+              const x1 = points[0].x;
+              const y1 = points[0].y;
+              const x2 = points[1].x;
+              const y2 = points[1].y;
+              const x3 = points[2].x;
+              const y3 = points[2].y;
+              const x4 = points[3].x;
+              const y4 = points[3].y;
+
+              // Calculate min/max values to define the bounding box
+              const minX = Math.min(x1, x2, x3, x4);
+              const maxX = Math.max(x1, x2, x3, x4);
+              const minY = Math.min(y1, y2, y3, y4);
+              const maxY = Math.max(y1, y2, y3, y4);
+
+              // Adjust the coordinates to match the video feed scale
+              const videoWidth = videoElement.videoWidth;
+              const videoHeight = videoElement.videoHeight;
+              const scaleX = canvas.width / videoWidth;
+              const scaleY = canvas.height / videoHeight;
+
+              // Scale the coordinates of the bounding box
+              const x = minX * scaleX;
+              const y = minY * scaleY;
+              const width = (maxX - minX) * scaleX;
+              const height = (maxY - minY) * scaleY;
+
+              const radius = 1; // Radius for rounded corners
+              const strokeWidth = 2; // Set a constant stroke width
+
+              ctx.beginPath();
+              ctx.moveTo(x + radius, y);
+              ctx.lineTo(x + width - radius, y);
+              ctx.lineTo(x + width, y + height - radius);
+              ctx.lineTo(x + radius, y + height);
+              ctx.lineTo(x, y + radius);
+              ctx.closePath();
+
+              // Draw the rectangle with rounded corners
+              ctx.lineWidth = strokeWidth; // Use the constant stroke width
+              ctx.strokeStyle = 'yellow';
+              ctx.stroke();
+            }
+          }
+
+          if (err && !(err instanceof ZXing.NotFoundException)) {
+            console.error(err);
+            document.getElementById('result').textContent = err;
+          }
+        });
+        console.log(`Started continuous decode from camera with id ${selectedDeviceId}`);
+      });
+
+      document.getElementById('resetButton').addEventListener('click', () => {
+        codeReader.reset();
+        document.getElementById('result').textContent = '';
+        console.log('Reset.');
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
+
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate QR Code</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #qrcode {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .btn-custom {
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+        }
+        .btn-custom:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="text-center mb-4">Generate QR Code</h1>
+
+        <form id="qrForm">
+            <div class="mb-3">
+                <label for="personalnummer" class="form-label">Personalnummer</label>
+                <input type="text" class="form-control" id="personalnummer" name="personalnummer" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="lager" class="form-label">Lager</label>
+                <input type="text" class="form-control" id="lager" name="lager" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="lagerort" class="form-label">Lagerort</label>
+                <input type="text" class="form-control" id="lagerort" name="lagerort" required>
+            </div>
+        </form>
+        <canvas id="qrcode"></canvas>
+    </div>
+
+    <script>
+        const personalnummerInput = document.getElementById('personalnummer');
+        const lagerInput = document.getElementById('lager');
+        const lagerortInput = document.getElementById('lagerort');
+        const qrcodeCanvas = document.getElementById('qrcode');
+
+        // Function to generate the QR code
+        function generateQRCode() {
+            const personalnummer = personalnummerInput.value;
+            const lager = lagerInput.value;
+            const lagerort = lagerortInput.value;
+
+            const qrData = {
+                user: {
+                    employeeid: personalnummer || "empty"
+                },
+                stock: {
+                    id: lager || "empty",
+                    locationid: lagerort || "empty"
+                }
+            };
+
+            // Clear previous QR code if any
+            qrcodeCanvas.getContext('2d').clearRect(0, 0, qrcodeCanvas.width, qrcodeCanvas.height);
+
+            // Generate QR code using qrcode.js
+            QRCode.toCanvas(qrcodeCanvas, JSON.stringify(qrData), { width: 200, height: 200 }, function(error) {
+                if (error) {
+                    console.error(error);
+                }
+            });
+        }
+
+        // Add event listeners to the input fields to generate QR code on input
+        personalnummerInput.addEventListener('input', generateQRCode);
+        lagerInput.addEventListener('input', generateQRCode);
+        lagerortInput.addEventListener('input', generateQRCode);
+
+        // Generate an initial QR code when the page loads
+        window.onload = generateQRCode;
+    </script>
+
+    <!-- Bootstrap JS (Optional for interactive components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

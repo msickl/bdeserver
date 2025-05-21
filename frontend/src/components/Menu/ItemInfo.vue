@@ -38,7 +38,7 @@
           <button @click="handleRemoveSerial(item.id, serial.guid)" class="btn btn-danger remove-btn">-</button>
         </div>
       </div>
-      <button v-if="item.count > item.serials.length" @click="handleAddSerial(item.id)" class="btn btn-success add-btn">Add Serial</button>
+      <button v-if="item.count > item.serials.length" @click="handleAddSerial(item.id)" class="btn btn-success add-btn">{{ item.count - item.serials.length }} Seriennummern noch Scannen</button>
     </div>
   </div>
 </div>

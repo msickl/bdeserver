@@ -46,7 +46,9 @@ const onNo = () => {
   max-width: 400px;
   width: 100%;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  margin: 0 auto; /* Ensure it stays centered */
 }
+
 
 .modal-content h3 {
   font-size: 20px;

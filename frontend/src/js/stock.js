@@ -1,9 +1,9 @@
 export default class Stock {
     constructor() {
-        this.id = null;
-        this.locationid = null;
-        this.name = null;
-        this.locationname = null;
+        this.id = '';
+        this.locationid = '';
+        this.name = '';
+        this.locationname = '';
         this.operationtype = 1;
     }
 

@@ -30,110 +30,24 @@
     </div>
 
     <!-- Menu 4 Booking -->
-    <div v-if="menu.current === 4" class="menu">
+    <div v-if="menu.current === 4 && credentialStore.isLoggedIn" class="menu">
       <Booking />
-      <!--
-      <h3>BENUTZER</h3>
-      <div v-if="booking.user.lastname" class="value">
-        <label class="label-small-gray">Benutzer</label>
-        <div style="font-weight: bold;">{{ booking.user.lastname }}</div>
-      </div>
-      <hr />
-      <h3>LAGER</h3>
-      <div v-if="booking.stock.name" class="value">
-        <label class="label-small-gray">Hauptlager</label>
-        <div>{{ booking.stock.name }}</div>
-      </div>
-      <div v-if="booking.stock.locationname" class="value">
-        <label class="label-small-gray">Lagerort</label>
-        <div>{{ booking.stock.locationname }}</div>
-      </div>
-      <div class="mb-3">
-        <label class="label-small-gray">Buchungsart</label>
-        <select class="form-select custom-select" v-model="booking.stock.operationtype">
-          <option value="1">Abbuchung</option>
-          <option value="2">Rückbuchung</option>
-          <option value="3">Inventur</option>
-          <option value="4">Verschrottung</option>
-        </select>
-      </div>
-      <h3>AUFTRAG</h3>
-      <button @click="booking.addOrder()" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
-      <div v-if="booking.order" class="value">
-        <div v-if="booking.order" class="value">
-          <label class="label-small-gray">Auftrag</label>
-          <div>{{ booking.order.VORGNR }}</div>
-        </div>
-        <div v-if="booking.order" class="value">
-          <label class="label-small-gray">Name</label>
-          <div>{{ booking.order.NAME1 }}</div>
-        </div>
-      </div>
-      <hr />
-      
-      <h3>ARTIKEL</h3>
-      <button @click="booking.addItem()" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
-    
-      <div v-if="booking.items" class="value">
-        <div v-for="item in booking.items" :key="item.id">
-          <div class="value">
-            <label class="label-small-gray">Artikelnummer</label>
-            <div>{{ item.id }}</div>
-          </div>
-          <div v-if="item.var1" class="value">
-            <label class="label-small-gray">Bezeichnung 1</label>
-            <div>{{ item.var1 }}</div>
-          </div>
-          <div v-if="item.var2" class="value">
-            <label class="label-small-gray">Bezeichnung 2</label>
-            <div>{{ item.var2 }}</div>
-          </div>
-          <div>
-            <label class="label-small-gray">Anzahl</label>
-            <div class="input-group">
-              <input
-                type="number"
-                id="quantity"
-                class="form-control text-center"
-                v-model="item.count"
-                min="0"
-                :max="item.count"
-              />
-              <button @click="booking.removeItem(item.id)" class="btn btn-danger">-</button>
-              <button @click="booking.addItem(item.id)" class="btn btn-success">+</button>
-            </div>
-          </div>
-          <div v-if="item.serialrequired">
-            <div v-for="serial in item.serials" :key="serial.guid" class="serial-item">
-              <div class="input-group">
-                <div class="value">
-                  <label class="label-small-gray">{{ serial.type }}</label>
-                  <div class="serial-number">{{ serial.number }}</div>
-                </div>
-                <button @click="booking.removeSerial(item.id, serial.guid)" class="btn btn-danger remove-btn">-</button>
-              </div>
-            </div>
-            <button v-if="item.count > item.serials.length" @click="booking.addSerial(item.id)" class="btn btn-success add-btn">Add Serial</button>
-          </div>
-        </div>
-      </div>
-      <button class="btn btn-success mt-3 w-100">Buchen</button> -->
       <button @click="menu.navigate(1)" class="btn btn-danger mt-3 w-100">Close</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive  } from 'vue';
-//import Booking from '@/js/booking';
+import { ref, reactive, watch  } from 'vue';
 import Item from '@/js/item';
 
 import ProductInfoComponent from '@/components/Menu/ProductInfoComponent.vue';
 import Booking from '@/components/Menu/Booking.vue';
+import { useCredentialStore } from '../stores/useCredentialStore';
 
-//const booking = reactive(new Booking());
 const ProductInfoData = ref(null);
 
+const credentialStore = useCredentialStore();
 const menu = reactive({
   current: 1,
   navigate(targetMenuId) {
@@ -153,9 +67,25 @@ async function newProductInfo(){
 }
 
 async function newStockBooking() {
+  if(credentialStore.isLoggedIn)
+  {
   menu.navigate(4);
+  } else {
+
+  }
+  
+ 
 }
 
+
+watch(
+  () => credentialStore.isLoggedIn,
+  (newVal) => {
+    if (!newVal) {
+      menu.navigate(1);
+    }
+  }
+);
 </script>
 
 

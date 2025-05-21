@@ -1,7 +1,8 @@
 <template>
   <div id="app">
-    <TopbarComponent />
-    
+    <TopbarComponent :showSidebar="showSidebar" @toggleSidebar="toggleSidebar" />
+    <SidebarComponent :showSidebar="showSidebar" @login="login"/>
+
     <MenuComponent />
 
     <SearchComponent 
@@ -11,7 +12,6 @@
       @submit="searchStore.handleSearchResult"
     />
 
-
     <ScannerComponent 
       v-if="scanStore.showScan"
       :scanTitle="scanStore.scanTitle"
@@ -19,7 +19,6 @@
       @submit="scanStore.handleScanResult"
     />
 
-    <SidebarComponent />
     <LoaderComponent />
 
     <ConfirmationModal 
@@ -30,15 +29,13 @@
       v-if="notificationModalStore.isModalVisible"
     />
 
-    <div class="statusbar">
-      <div class="connection-dot" :class="{ connected: isConnected, disconnected: !isConnected  }"></div>
-      <small>J. Zimmer Maschinenbau GmbH</small>
-    </div>
+    <Statusbar />
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watchEffect } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useWebSocketStore } from '@/stores/websocket';
 
 import TopbarComponent from '@/components/TopbarComponent.vue';  
@@ -59,17 +56,27 @@ import ConfirmationModal from '@/components/ConfirmationModalComponent.vue'
 import { useNotificationModalStore } from '@/stores/useNotificationModalStore'
 import NotificationModal from '@/components/NotificationModalComponent.vue'
 
+import Statusbar from './components/Statusbar.vue';
+
 const wsStore = useWebSocketStore();
 const searchStore = useSearchStore();
 const scanStore = useScanStore();
 const confirmationModalStore = useConfirmationModalStore();
 const notificationModalStore = useNotificationModalStore();
 
-const isConnected = ref(false);
-
 onMounted(() => {
   wsStore.initializeWebSocket("ws://127.0.0.1:8080/ws");
 });
+
+
+const showSidebar = ref(false);
+const toggleSidebar = () => {
+  showSidebar.value = !showSidebar.value; 
+};
+
+const login = () => {
+  console.log('login');
+}
 
 </script>
 
@@ -201,64 +208,9 @@ small {
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #343a40;
-  color: white;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
-  z-index: 100;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-}
-
-.sidebar-show {
-  transform: translateX(0);
-}
-
-.sidebar-content {
-  padding: 1rem;
-}
-
-.sidebar .nav-link {
-  color: white;
-  padding: 0.5rem 0;
-}
-
-.sidebar .nav-link:hover {
-  background-color: #495057;
-  border-radius: 4px;
-}
 
 .modal-backdrop {
   --bs-backdrop-zindex: -1 !important;
 }
 
-.connection-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-}
-.connected {
-  background-color: green; 
-}
-.disconnected {
-  background-color: red; 
-}
-
-.statusbar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #6c757d;
-  color: white;
-  padding: 5px;
-  z-index: 1000;
-  text-align: center;
-}
 </style>

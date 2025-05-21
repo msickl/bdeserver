@@ -1,26 +1,27 @@
 <template>
   <div>
-    <UserInfo :user="booking.user" />
+    <UserInfo :user="credentialStore.user" />
     <hr />
-    <StockInfo :stock="booking.stock" />
+    <StockInfo :stock="credentialStore.stock" />
     <hr />
     <button @click="addOrder" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
     <OrderInfo :order="booking.order" />
-    <hr />
-    <button @click="addItem(null)" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
-    <ItemInfo
+    <hr v-if="booking.order"/>
+    <button v-if="booking.order" @click="addItem(null)" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
+    <ItemInfo 
       :items="booking.items"
       @addItem="addItem"
       @removeItem="removeItem"
       @addSerial="addSerial"
       @removeSerial="removeSerial"
     />
-    <button class="btn btn-success mt-3 w-100">Buchen</button>
+    <hr />
+    <button v-if="booking.items.length > 0 " class="btn btn-success mt-3 w-100">Buchen</button>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive } from 'vue';
+import { reactive } from 'vue';
 
 import UserInfo from '@/components/Menu/UserInfo.vue';
 import StockInfo from '@/components/Menu/StockInfo.vue';
@@ -28,18 +29,15 @@ import OrderInfo from '@/components/Menu/OrderInfo.vue';
 import ItemInfo from '@/components/Menu/ItemInfo.vue';
 
 import Item from "@/js/item.js";
-import Stock from "@/js/stock.js";
-import User from "@/js/user.js";
 import Order from "@/js/order.js";
 import Helper from "@/js/helper.js";
 import Serial from "@/js/serial.js";
 import { useConfirmationModalStore } from '@/stores/useConfirmationModalStore';
 import { useNotificationModalStore } from '@/stores/useNotificationModalStore';
+import { useCredentialStore } from '@/stores/useCredentialStore';
 
 const booking = reactive({
   guid: new Helper().generateUUID(),
-  user: new User(),
-  stock: new Stock(),
   order: null,
   items: []
 });
@@ -86,7 +84,7 @@ function removeItem(Id) {
   const existingItem = booking.items.find(entry => entry.id === Id);
   
   if (!existingItem) {
-      return; // Item with Id not found
+      return; 
   }
   
   const serialCount = existingItem.serials?.length || 0;
@@ -112,7 +110,6 @@ async function addSerial(Id) {
           if (!existingItem.serials) {
               existingItem.serials = [];
           }
-          // check if serial already exists (use '===' for comparison)
           const existingSerialIndex = existingItem.serials.findIndex(entry => entry.number === serial.number);
           if (existingSerialIndex === -1) {
               existingItem.serials.push(serial);
@@ -138,13 +135,6 @@ async function removeSerial(Id, Guid) {
   }  
 }
 
-onMounted(async () => {
-  try {
-    await booking.user.fetch(2345);
-    await booking.stock.fetch(1, 20);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
-});
+const credentialStore = useCredentialStore();
 
 </script>

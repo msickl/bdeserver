@@ -1,9 +1,9 @@
 export default class User {
     constructor() {
-        this.employeeId = null;
-        this.username = null;
-        this.firstName = null;
-        this.lastName = null;
+        this.employeeId = '';
+        this.username = '';
+        this.firstName = '';
+        this.lastName = '';
     }
 
     async fetch(userId) {

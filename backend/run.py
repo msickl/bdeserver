@@ -87,7 +87,6 @@ def api_stock():
 
     if request.method == 'PATCH':
         data = request.json
-    
 
 @app.route('/api/stockinfo', methods=['GET'])
 def api_stockinfo():
@@ -147,6 +146,16 @@ def api_order():
         order = Order()
         data = order.fetch()
         return jsonify({"status": "success", "data": data}), 200
+
+@app.route('/api/login', methods=['GET'])
+def api_login():
+    return render_template('login.html');
+
+    
+@app.route('/api/qr', methods=['GET'])
+def qr():
+    return render_template('qr.html');
+
 
 if __name__ == '__main__':
     app.run(debug=True)
