@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <TopbarComponent :showSidebar="showSidebar" @toggleSidebar="toggleSidebar" />
-    <SidebarComponent :showSidebar="showSidebar" @login="login"/>
+    <TopbarComponent />
+    <SidebarComponent />
 
     <MenuComponent />
 
@@ -67,16 +67,6 @@ const notificationModalStore = useNotificationModalStore();
 onMounted(() => {
   wsStore.initializeWebSocket("ws://127.0.0.1:8080/ws");
 });
-
-
-const showSidebar = ref(false);
-const toggleSidebar = () => {
-  showSidebar.value = !showSidebar.value; 
-};
-
-const login = () => {
-  console.log('login');
-}
 
 </script>
 

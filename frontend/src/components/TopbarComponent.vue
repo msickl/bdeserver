@@ -4,21 +4,21 @@
     <font-awesome-icon :icon="batteryIcon" />
     <font-awesome-icon :icon="wifiIcon" :style="wifiStyle" />
 
-    <div class="beacon-button" @click="handleToggleSidebar">
+    <div class="beacon-button" @click="menu.toggleSidebar">
       <svg viewBox="0 0 100 100" width="40" height="40">
         <path
           class="line top"
-          :class="{ active: showSidebar }"
+          :class="{ active: menu.isSidebarEnabled }"
           d="M 20,29 H 80"
         />
         <path
           class="line middle"
-          :class="{ active: showSidebar }"
+          :class="{ active: menu.isSidebarEnabled }"
           d="M 20,50 H 80"
         />
         <path
           class="line bottom"
-          :class="{ active: showSidebar }"
+          :class="{ active: menu.isSidebarEnabled }"
           d="M 20,71 H 80"
         />
       </svg>
@@ -33,21 +33,13 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { useWebSocketStore } from '../stores/websocket';
 import { useCredentialStore } from '../stores/useCredentialStore';
+import { useMenuStore } from '../stores/useMenuStore';
 
 library.add(faBatteryFull, faBatteryThreeQuarters, faBatteryHalf, faBatteryEmpty, faWifi, faUserLarge, faUserLargeSlash);
 
 const store = useWebSocketStore();
 const creds = useCredentialStore();
-
-const props = defineProps({
-  showSidebar: Boolean,
-});
-
-const emit = defineEmits(['toggleSidebar']);
-
-const handleToggleSidebar = () => {
-  emit('toggleSidebar');
-};
+const menu = useMenuStore();
 
 const batteryInfo = ref(0);
 const wlanInfo = ref(0);

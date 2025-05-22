@@ -1,13 +1,13 @@
 <template>
-  <div :class="['sidebar', { 'sidebar-show': showSidebar }]">
+  <div :class="['sidebar', { 'sidebar-show': menu.isSidebarEnabled }]">
     <div class="sidebar-content">
-      <h4 class="text-center text-dark mb-4">Welcome</h4>
+      <h4 class="text-left text-dark mb-4 welcome">Welcome</h4>
       <ul class="nav flex-column">
         <!-- Login Form -->
         <div class="p-3 bg-light rounded mt-2 login-form animate__animated animate__slideInDown">
           <div class="form-group mb-2">
             <label for="personalnummer" class="text-dark">Personalnummer</label>
-            <input type="text" class="form-control" id="personalnummer" v-model="credentialStore.user.employeeId">
+            <input type="number" class="form-control" id="personalnummer" v-model="credentialStore.user.employeeId">
             <div v-if="credentialStore.user" class="value">
               <label class="label-small-gray">Name</label>
               <div>{{ credentialStore.user.lastName }} {{ credentialStore.user.firstName }}</div>
@@ -15,7 +15,7 @@
           </div>
           <div class="form-group mb-2">
             <label for="lagernummer" class="text-dark">Lagernummer</label>
-            <input type="text" class="form-control" id="lagernummer" v-model="credentialStore.stock.id">
+            <input type="number" class="form-control" id="lagernummer" v-model="credentialStore.stock.id">
           </div>
           <div v-if="credentialStore.user" class="value">
               <label class="label-small-gray">Name</label>
@@ -23,7 +23,7 @@
             </div>
           <div class="form-group mb-3">
             <label for="lagerort" class="text-dark">Lagerort</label>
-            <input type="text" class="form-control" id="lagerort" v-model="credentialStore.stock.locationid">
+            <input type="number" class="form-control" id="lagerort" v-model="credentialStore.stock.locationid">
           </div>
           <div v-if="credentialStore.user" class="value">
               <label class="label-small-gray">Name</label>
@@ -51,27 +51,28 @@
           </div>
           <button v-if="!credentialStore.isLoggedIn" @click="handleLogin" class="btn btn-primary mt-3 w-100">Login</button>
           <button v-if="credentialStore.isLoggedIn" class="btn btn-secondary mt-3 w-100" @click="handleLogout">Logout</button>
-          <!-- Schematic QR Code Icon -->
-          
+
         </div>
       </ul>
+
+      <!-- About Section -->
+      <div class="sidebar-about">
+        <h5 class="text-left text-dark">About</h5>
+        <p class="text-left text-muted">© <span>{{ currentYear }}</span> J. Zimmer Maschinenbau GmbH. All rights reserved.</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useScanStore } from '@/stores/useScanStore';
 import { useCredentialStore } from '../stores/useCredentialStore';
+import { useMenuStore } from '../stores/useMenuStore';
 
 const credentialStore = useCredentialStore();
-const EmployeeId = ref('');
-const StockId = ref('');
-const StockLocationId = ref('');
-
-const props = defineProps({
-  showSidebar: Boolean
-});
+const menu = useMenuStore();
+const currentYear = ref(new Date().getFullYear());
 
 async function handleQRLogin()
 {
@@ -85,30 +86,51 @@ async function handleQRLogin()
     credentialStore.user.employeeId = data.user.employeeid;
     credentialStore.stock.id = data.stock.id;
     credentialStore.stock.locationid = data.stock.locationid;
-    const res = await credentialStore.login();
-    if(!res)
-    {
-      alert('can not login');
-    }
+
+    handleLogin();
+  } else {
+    alert('ungültige anmeldeinformationen');
   }
 }
 
 async function handleLogin()
 {
-  await credentialStore.login();
+  const res = await credentialStore.login();
+  if(res)
+  {
+    menu.hideSidebar();
+  } else {
+    alert('ungültige zugangsdaten');
+  }
 }
 
 function handleLogout()
 {
   credentialStore.logout();  
 }
+
+const handleEnter = async (event) => {
+  if (event.key === 'Enter') {
+    handleLogin();
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('keydown', handleEnter);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', handleEnter);
+});
+
+
 </script>
 
 <style scoped>
 .sidebar {
   position: fixed;
   top: 0;
-  left: -100%; /* Initially hidden off the left side */
+  left: -100%; 
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, #f0f0f0, #adb5bd); /* Lighter gradient background */
@@ -142,4 +164,15 @@ function handleLogout()
 .sidebar .nav-link:focus {
   outline: none;
 }
+.sidebar-about {
+  margin-top: auto;
+  position: absolute;
+  bottom: 50px;
+  height: 70px;
+  padding:5px;
+  font-size: 8pt;
+}
+ .welcome {
+    margin-top: 60px;
+  }
 </style>

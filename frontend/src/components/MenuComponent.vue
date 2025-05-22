@@ -2,14 +2,25 @@
   <div>
     <!-- Menu 1 -->
     <div v-if="menu.current === 1" class="menu">
-      <h1>Hauptmenü</h1>
-      <div>
-        <button @click="newProductInfo" class="btn btn-primary mt-3 w-100">Produktinformation</button>
-        <br />
-        <button :disabled="!creds.isLoggedIn" @click="newStockBooking" class="btn btn-primary mt-3 w-100">Buchen</button>
+      <h1 class="menu-title">Hauptmenü</h1>
+      <div class="menu-content">
+        <h2 class="menu-subheading">Anzeigen</h2>
+        <div class="spacer"></div>
+        <button @click="newProductInfo" class="btn btn-primary w-100 menu-btn">Produktinformationen</button>
+        <div class="spacer"></div>
+        <h2 class="menu-subheading">Buchen</h2>
+        <div class="spacer"></div>
+        <button :disabled="!creds.isLoggedIn" @click="newStockBooking" class="btn btn-primary w-100 menu-btn">Lagerbuchung</button>
+         <div class="spacer"></div>
+        <button :disabled="true" class="btn btn-primary w-100 menu-btn disabled-btn">Wareneingang</button>
+        <div class="spacer"></div>
+        <h2 class="menu-subheading">Wiegen</h2>
+        <div class="spacer"></div>
+        <button :disabled="true" class="btn btn-primary w-100 menu-btn disabled-btn">Gewicht erfassen</button>
+        <div class="spacer"></div>
+        
       </div>
     </div>
-
     <!-- Menu 2 -->
     <div v-if="menu.current === 2" class="menu">
       <ProductInfoComponent 
@@ -86,9 +97,55 @@ watch(
 );
 </script>
 
-
 <style scoped>
-.menu {
-  text-align: left;
-}
+  .menu {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: auto;
+    text-align: left;
+  }
+
+  .menu-title {
+    font-family: 'Arial', sans-serif;
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 20px;
+  }
+
+  .menu-subheading {
+    font-family: 'Arial', sans-serif;
+    font-size: 1.5rem;
+    color: #343a40;
+    margin-top: 20px;
+  }
+
+  .menu-btn {
+    background-color: #007bff;
+    border: none;
+    padding: 15px;
+    font-size: 1.1rem;
+    color: white;
+    transition: background-color 0.3s ease;
+    border-radius: 5px;
+  }
+
+  .menu-btn:hover {
+    background-color: #0056b3;
+  }
+
+  .disabled-btn {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+
+  .menu-content {
+    margin-top: 20px;
+  }
+
+  .spacer {
+    height: 15px;
+  }
 </style>

@@ -1,11 +1,13 @@
 <template>
   <div>
-    <UserInfo :user="credentialStore.user" />
+    <UserInfo />
     <hr />
-    <StockInfo :stock="credentialStore.stock" />
+    <StockInfo />
     <hr />
-    <button @click="addOrder" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
-    <OrderInfo :order="booking.order" />
+    <div v-if="credentialStore.stock.operationtype !== 3 && credentialStore.stock.operationtype !== 4">
+      <button @click="addOrder" class="btn btn-primary mt-3 w-100">Auftrag erfassen</button>
+      <OrderInfo :order="booking.order" />
+    </div>
     <hr v-if="booking.order"/>
     <button v-if="booking.order" @click="addItem(null)" class="btn btn-primary mt-3 w-100">Artikel erfassen</button>
     <ItemInfo 
@@ -35,6 +37,8 @@ import Serial from "@/js/serial.js";
 import { useConfirmationModalStore } from '@/stores/useConfirmationModalStore';
 import { useNotificationModalStore } from '@/stores/useNotificationModalStore';
 import { useCredentialStore } from '@/stores/useCredentialStore';
+
+const credentialStore = useCredentialStore();
 
 const booking = reactive({
   guid: new Helper().generateUUID(),
@@ -135,6 +139,6 @@ async function removeSerial(Id, Guid) {
   }  
 }
 
-const credentialStore = useCredentialStore();
+
 
 </script>

@@ -19,13 +19,13 @@
         <input
           type="number"
           id="quantity"
-          class="form-control text-center"
+          class="form-control text-center large-input"
           v-model="item.count"
           min="0"
           :max="item.count"
         />
-        <button @click="handleRemoveItem(item.id)" class="btn btn-danger">-</button>
-        <button @click="handleAddItem(item.id)" class="btn btn-success">+</button>
+        <button @click="handleRemoveItem(item.id)" class="btn btn-danger large-btn">-</button>
+        <button @click="handleAddItem(item.id)" class="btn btn-success large-btn">+</button>
       </div>
     </div>
     <div v-if="item.serialrequired">
@@ -120,5 +120,11 @@ function handleRemoveSerial(itemId, serialGuid) {
 
 .add-btn:hover {
   background-color: #218838;
+}
+
+.large-input,
+.large-btn {
+  font-size: 18pt;
+  padding: 10px 20px;
 }
 </style>

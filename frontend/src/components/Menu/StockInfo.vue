@@ -1,16 +1,16 @@
 <template>
   <div>
-    <div v-if="stock.name" class="value">
+    <div v-if="store.stock.name" class="value">
       <label class="label-small-gray">Hauptlager</label>
-      <div>{{ stock.name }}</div>
+      <div>{{ store.stock.name }}</div>
     </div>
-    <div v-if="stock.locationname" class="value">
+    <div v-if="store.stock.locationname" class="value">
       <label class="label-small-gray">Lagerort</label>
-      <div>{{ stock.locationname }}</div>
+      <div>{{ store.stock.locationname }}</div>
     </div>
     <div class="mb-3">
       <label class="label-small-gray">Buchungsart</label>
-      <select class="form-select custom-select" v-model="stock.operationtype">
+      <select class="form-select custom-select" v-model="store.stock.operationtype">
         <option value="1">Abbuchung</option>
         <option value="2">Rückbuchung</option>
         <option value="3">Inventur</option>
@@ -21,7 +21,6 @@
 </template>
 
 <script setup>
-defineProps({
-  stock: Object
-});
+import { useCredentialStore } from '../../stores/useCredentialStore';
+const store = useCredentialStore();
 </script>
