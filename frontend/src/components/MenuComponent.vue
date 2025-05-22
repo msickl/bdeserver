@@ -6,7 +6,7 @@
       <div>
         <button @click="newProductInfo" class="btn btn-primary mt-3 w-100">Produktinformation</button>
         <br />
-        <button @click="newStockBooking" class="btn btn-primary mt-3 w-100">Buchen</button>
+        <button :disabled="!creds.isLoggedIn" @click="newStockBooking" class="btn btn-primary mt-3 w-100">Buchen</button>
       </div>
     </div>
 
@@ -30,7 +30,7 @@
     </div>
 
     <!-- Menu 4 Booking -->
-    <div v-if="menu.current === 4 && credentialStore.isLoggedIn" class="menu">
+    <div v-if="menu.current === 4" class="menu">
       <Booking />
       <button @click="menu.navigate(1)" class="btn btn-danger mt-3 w-100">Close</button>
     </div>
@@ -47,7 +47,7 @@ import { useCredentialStore } from '../stores/useCredentialStore';
 
 const ProductInfoData = ref(null);
 
-const credentialStore = useCredentialStore();
+const creds = useCredentialStore();
 const menu = reactive({
   current: 1,
   navigate(targetMenuId) {
@@ -67,19 +67,17 @@ async function newProductInfo(){
 }
 
 async function newStockBooking() {
-  if(credentialStore.isLoggedIn)
+  if(creds.isLoggedIn)
   {
-  menu.navigate(4);
+    menu.navigate(4);
   } else {
 
   }
-  
- 
 }
 
 
 watch(
-  () => credentialStore.isLoggedIn,
+  () => creds.isLoggedIn,
   (newVal) => {
     if (!newVal) {
       menu.navigate(1);

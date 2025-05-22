@@ -52,8 +52,12 @@ function openModal() {
     store.sendMessage({ Action: 'startScan', Data: null })
       .then(response => {
         if (response?.Action === 'scanReceived') {
+          if (modalInstance) {
+            modalInstance.hide();
+            const backdrop = document.querySelector('.modal-backdrop');
+            backdrop.remove();
+          }
           emit('submit', response.Data);
-          closeModal();
         } else if (response?.Action === 'scanTimedout' || response?.Action === 'scanClosed') {
           closeModal();
         } else {
