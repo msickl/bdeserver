@@ -1,9 +1,9 @@
 <template>
   <div class="topbar">
     <font-awesome-icon :icon="userIcon" :style="iconStyle" />
-    <font-awesome-icon :icon="batteryIcon" />
-    <font-awesome-icon :icon="wifiIcon" :style="wifiStyle" />
-
+    <img :src="batteryIcon" width="40px" />
+    <img :src="wifiIcon" width="40px" height="40px" />
+    
     <div class="beacon-button" @click="menu.toggleSidebar">
       <svg viewBox="0 0 100 100" width="40" height="40">
         <path
@@ -28,14 +28,25 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { faBatteryFull, faBatteryThreeQuarters, faBatteryHalf, faBatteryEmpty, faWifi, faUserLarge, faUserLargeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faUserLarge, faUserLargeSlash } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { useWebSocketStore } from '../stores/useWebSocketStore';
-import { useCredentialStore } from '../stores/useCredentialStore';
-import { useMenuStore } from '../stores/useMenuStore';
+import { useWebSocketStore } from '@/stores/useWebSocketStore';
+import { useCredentialStore } from '@/stores/useCredentialStore';
+import { useMenuStore } from '@/stores/useMenuStore';
 
-library.add(faBatteryFull, faBatteryThreeQuarters, faBatteryHalf, faBatteryEmpty, faWifi, faUserLarge, faUserLargeSlash);
+import WifiNone from '@/assets/wifi/wifi-none.svg?component';  
+import WifiFull from '@/assets/wifi/wifi-full.svg?component';
+import WifiGood from '@/assets/wifi/wifi-good.svg?component';
+import WifiMedium from '@/assets/wifi/wifi-medium.svg?component';
+import WifiMinimal from '@/assets/wifi/wifi-minimal.svg?component';
+
+import BatteryEmpty from '@/assets/battery/battery-empty.svg?component';  
+import BatteryFull from '@/assets/battery/battery-full.svg?component';
+import BatteryOne from '@/assets/battery/battery-one.svg?component';
+import BatteryTwo from '@/assets/battery/battery-two.svg?component';
+
+library.add(faUserLarge, faUserLargeSlash);
 
 const store = useWebSocketStore();
 const creds = useCredentialStore();
@@ -48,18 +59,28 @@ const wlanSignal = ref(0);
 
 const batteryIcon = computed(() => {
   if (batteryInfo.value >= 75) {
-    return ['fas', 'battery-full'];
+    return BatteryFull;
   } else if (batteryInfo.value >= 50) {
-    return ['fas', 'battery-three-quarters'];
+    return BatteryTwo;
   } else if (batteryInfo.value >= 25) {
-    return ['fas', 'battery-half'];
+    return BatteryOne;
   } else {
-    return ['fas', 'battery-empty'];
+    return BatteryEmpty;
   }
 });
 
 const wifiIcon = computed(() => {
-  return ['fas', 'wifi'];
+  if (wlanSignal.value >= 75) {
+    return WifiFull;
+  } else if (wlanSignal.value >= 50) {
+    return WifiGood;
+  } else if (wlanSignal.value >= 35) {
+    return WifiMedium;
+  } else if (wlanSignal.value >= 15) {
+    return WifiMinimal;
+  } else {
+    return WifiNone;
+  }
 });
 
 const wifiStyle = computed(() => {
@@ -101,7 +122,6 @@ onMounted(() => {
       if (message.Action === 'deviceInfo') {
         batteryInfo.value = message.Data.battery.EstimatedChargeRemaining;
         batteryStatus.value = message.Data.battery.BatteryStatus;
-
         wlanSignal.value = message.Data.wlan.signal;
       }
     } catch {}

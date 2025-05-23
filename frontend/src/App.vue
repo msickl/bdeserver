@@ -199,8 +199,6 @@ small {
 }
 
 
-.modal-backdrop {
-  --bs-backdrop-zindex: -1 !important;
-}
+
 
 </style>

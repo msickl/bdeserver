@@ -1,15 +1,7 @@
 <template>
   <div class="scanner">
-    <div
-      ref="scannerModal"
-      class="modal fade"
-      id="scannerModal"
-      tabindex="-1"
-      aria-labelledby="scannerModalLabel"
-      aria-hidden="true"
-      data-bs-backdrop="static"
-    >
-      <div class="modal-dialog modal-dialog-centered">
+    <div ref="scanModal" class="modal fade" tabindex="-1">
+     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="scannerModalLabel">{{ scanTitle }}</h5>
@@ -36,15 +28,20 @@ const props = defineProps({
   scanTitle: String
 });
 
-const scannerModal = ref(null);
+const scanModal = ref(null);
 const store = useWebSocketStore();
-let modalInstance = null;
+let modal = null;
 let isScanRequested = false;
 
 function openModal() {
-  if (scannerModal.value) {
-    modalInstance = new Modal(scannerModal.value);
-    modalInstance.show();
+  if (scanModal.value) {
+    modal = new Modal(scanModal.value, {
+      backdrop: false,
+      zIndex: 1050
+    });
+    modal.show();
+    //const backdrop = document.querySelector('.modal-backdrop');
+    //backdrop.remove();
   }
 
   if (!isScanRequested) {
@@ -52,10 +49,13 @@ function openModal() {
     store.sendMessage({ Action: 'startScan', Data: null })
       .then(response => {
         if (response?.Action === 'scanReceived') {
-          if (modalInstance) {
-            modalInstance.hide();
+          if (modal) {
+            modal.hide();
             const backdrop = document.querySelector('.modal-backdrop');
-            backdrop.remove();
+            if(backdrop)
+            {
+              backdrop.remove();
+            }
           }
           emit('submit', response.Data);
         } else if (response?.Action === 'scanTimedout' || response?.Action === 'scanClosed') {
@@ -72,8 +72,8 @@ function openModal() {
 }
 
 function closeModal() {
-  if (modalInstance) {
-    modalInstance.hide();
+  if (modal) {
+    modal.hide();
   }
   emit('close');
   store.sendMessage({ Action: 'closeScan', Data: null }).catch(error =>
@@ -98,8 +98,9 @@ function handleKeyDown(event) {
 </script>
 
 <style scoped>
-.scanner .modal-body img {
-  max-width: 80%;
-  margin: auto;
+.modal {
+  background-color: rgba(0, 0, 0, 0.7) !important;
 }
+
+
 </style>

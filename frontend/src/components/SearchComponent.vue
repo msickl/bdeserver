@@ -1,6 +1,6 @@
 <template>
   <div class="search">
-    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal fade" ref="searchModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-fullscreen">
         <div class="modal-content">
           <div class="modal-header d-flex justify-content-between align-items-center">
@@ -60,10 +60,13 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'close']);
 
+const searchModal = ref(null);
+
 const searchDialogQuery = ref('');
 const searchDialogSelectedEntry = ref(null);
 const searchDialogTitle = ref('Auftragssuche');
-let modalInstance = null;
+
+let modal = null;
 
 const searchDialogFilteredData = computed(() => {
   return (props.searchData || []).filter(entry =>
@@ -84,16 +87,18 @@ function confirmedSearchSelection() {
 
 function closeModal() {
   emit('close');
-  if (modalInstance) {
-    modalInstance.hide();
+  if (modal) {
+    modal.hide();
   }
 }
 
 function openModal() {
-  const modalEl = document.getElementById('myModal');
-  if (modalEl) {
-    modalInstance = new Modal(modalEl);
-    modalInstance.show();
+  if (searchModal.value) {
+    modal = new Modal(searchModal.value, {
+      backdrop: false,
+      zIndex: 1050
+    });
+    modal.show();
   }
 }
 
