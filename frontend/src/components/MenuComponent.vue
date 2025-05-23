@@ -4,21 +4,70 @@
     <div v-if="menu.current === 1" class="menu">
       <h1 class="menu-title">Hauptmenü</h1>
       <div class="menu-content">
-        <h2 class="menu-subheading">Anzeigen</h2>
+        <!-- Vorgänge -->
+        <h2 class="menu-subheading">Lagerverwaltung</h2>
         <div class="spacer"></div>
-        <button @click="newProductInfo" class="btn btn-primary w-100 menu-btn">Produktinformationen</button>
+        <button :disabled="!creds.isLoggedIn" @click="newStockBooking" class="btn btn-primary menu-btn w-100 position-relative text-center">
+          <i class="fa fa-right-to-bracket position-absolute start-0 ms-3 top-50 translate-middle-y"></i>
+          <span>Einlagern</span>
+        </button>
         <div class="spacer"></div>
-        <h2 class="menu-subheading">Buchen</h2>
+        <button :disabled="!creds.isLoggedIn" @click="newStockBooking" class="btn btn-primary menu-btn w-100 position-relative text-center">
+          <i class="fa fa-right-from-bracket position-absolute start-0 ms-3 top-50 translate-middle-y"></i>
+          <span>Auslagern</span>
+        </button>
         <div class="spacer"></div>
-        <button :disabled="!creds.isLoggedIn" @click="newStockBooking" class="btn btn-primary w-100 menu-btn">Lagerbuchung</button>
-         <div class="spacer"></div>
-        <button :disabled="true" class="btn btn-primary w-100 menu-btn disabled-btn">Wareneingang</button>
+        <button :disabled="true" class="btn btn-primary menu-btn w-100 position-relative text-center">
+          <i class="fa fa-arrow-up-right-dots position-absolute start-0 ms-3 top-50 translate-middle-y"></i>
+          <span>Inventur</span>
+        </button>
         <div class="spacer"></div>
-        <h2 class="menu-subheading">Wiegen</h2>
+        <button :disabled="true" class="btn btn-primary menu-btn w-100 position-relative text-center">
+          <i class="fa fa-shuffle position-absolute start-0 ms-3 top-50 translate-middle-y"></i>
+          <span>Umlagern</span>
+        </button>
+
+        <!-- Versand -->
+        <h2 class="menu-subheading">Logistik</h2>
         <div class="spacer"></div>
-        <button :disabled="true" class="btn btn-primary w-100 menu-btn disabled-btn">Gewicht erfassen</button>
+        <button :disabled="true" class="btn btn-primary menu-btn w-100 position-relative text-center">
+          <i class="fa fa-box-open position-absolute start-0 ms-3 top-50 translate-middle-y"></i>
+          <span>Wareneingang</span>
+        </button>
+        <div class="spacer"></div>
+        <button :disabled="true" class="btn btn-primary menu-btn w-100 position-relative text-center">
+          <i class="fa fa-box position-absolute start-0 ms-3 top-50 translate-middle-y"></i>
+          <span>Kommissionieren</span>
+        </button>
+        <div class="spacer"></div>
+        <button :disabled="true" class="btn btn-primary menu-btn w-100 position-relative text-center">
+          <i class="fa fa-truck-fast position-absolute start-0 ms-3 top-50 translate-middle-y"></i>
+          <span>Lieferung</span>
+        </button>
+        
+        
+        <div class="spacer"></div>
+
+        <!-- Information -->
+        <h2 class="menu-subheading">Informationen</h2>
+        <div class="spacer"></div>
+        <button @click="newProductInfo" class="btn btn-primary menu-btn w-100 position-relative text-center">
+          <i class="fa fa-expand position-absolute start-0 ms-3 top-50 translate-middle-y"></i>
+          <span>Produktinformationen</span>
+        </button>
+        <div class="spacer"></div>
+        <button :disabled="true" class="btn btn-primary menu-btn w-100 position-relative text-center">
+          <i class="fa fa-camera position-absolute start-0 ms-3 top-50 translate-middle-y"></i>
+          <span>Dokumentation</span>
+        </button>
         <div class="spacer"></div>
         
+        <h2 class="menu-subheading">Neues Menu</h2>
+        <div class="spacer"></div>
+        <button @click="menu.navigate(5)" class="btn btn-primary w-100 menu-btn">Produktinformation</button>
+        <div class="spacer"></div>
+        <button @click="menu.navigate(6)" class="btn btn-primary w-100 menu-btn">Buchen</button>
+
       </div>
     </div>
     <!-- Menu 2 -->
@@ -45,26 +94,34 @@
       <Booking />
       <button @click="menu.navigate(1)" class="btn btn-danger mt-3 w-100">Close</button>
     </div>
+
+    <div v-if="menu.current === 5" class="menu">
+      <NewViewArticleInfo />
+    </div>
+
+    <div v-if="menu.current === 6" class="menu">
+      <NewBookingMenu />
+      <button @click="menu.navigate(1)" class="btn btn-danger mt-3 w-100">Close</button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, watch  } from 'vue';
+import { ref, reactive, watch, computed  } from 'vue';
 import Item from '@/js/item';
 
 import ProductInfoComponent from '@/components/Menu/ProductInfoComponent.vue';
 import Booking from '@/components/Menu/Booking.vue';
 import { useCredentialStore } from '../stores/useCredentialStore';
 
+import NewBookingMenu from './newMenu/newBookingMenu.vue';
+import { useMenuStore } from '../stores/useMenuStore';
+import NewViewArticleInfo from './newMenu/newViewArticleInfo.vue';
+
 const ProductInfoData = ref(null);
 
 const creds = useCredentialStore();
-const menu = reactive({
-  current: 1,
-  navigate(targetMenuId) {
-    menu.current = targetMenuId;
-  }
-});
+const menu = useMenuStore();
 
 async function newProductInfo(){
   const item = new Item();
@@ -103,7 +160,7 @@ watch(
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
+    max-width: 600px;
     margin: auto;
     text-align: left;
   }
