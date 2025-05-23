@@ -29,7 +29,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Modal } from 'bootstrap';
-import { useWebSocketStore } from '@/stores/websocket';
+import { useWebSocketStore } from '@/stores/useWebSocketStore';
 
 const emit = defineEmits(['submit', 'close']);
 const props = defineProps({

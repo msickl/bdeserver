@@ -6,17 +6,17 @@
     <MenuComponent />
 
     <SearchComponent 
-      v-if="searchStore.showSearch" 
-      :searchData="searchStore.searchData" 
-      @close="searchStore.showSearch = false" 
-      @submit="searchStore.handleSearchResult"
+      v-if="search.showSearch" 
+      :searchData="search.searchData" 
+      @close="search.showSearch = false" 
+      @submit="search.handleSearchResult"
     />
 
     <ScannerComponent 
-      v-if="scanStore.showScan"
-      :scanTitle="scanStore.scanTitle"
-      @close="scanStore.showScan = false" 
-      @submit="scanStore.handleScanResult"
+      v-if="scan.showScan"
+      :scanTitle="scan.scanTitle"
+      @close="scan.showScan = false" 
+      @submit="scan.handleScanResult"
     />
 
     <LoaderComponent />
@@ -36,7 +36,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useWebSocketStore } from '@/stores/websocket';
+import { useWebSocketStore } from '@/stores/useWebSocketStore';
 
 import TopbarComponent from '@/components/TopbarComponent.vue';  
 import MenuComponent from '@/components/MenuComponent.vue';
@@ -58,14 +58,14 @@ import NotificationModal from '@/components/NotificationModalComponent.vue'
 
 import Statusbar from './components/Statusbar.vue';
 
-const wsStore = useWebSocketStore();
-const searchStore = useSearchStore();
-const scanStore = useScanStore();
+const ws = useWebSocketStore();
+const search = useSearchStore();
+const scan = useScanStore();
 const confirmationModalStore = useConfirmationModalStore();
 const notificationModalStore = useNotificationModalStore();
 
-onMounted(() => {
-  wsStore.initializeWebSocket("ws://127.0.0.1:8080/ws");
+onMounted(async () => {
+  await ws.initializeWebSocket("ws://127.0.0.1:8080/ws");
 });
 
 </script>

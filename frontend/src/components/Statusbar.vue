@@ -1,20 +1,13 @@
 <template>
     <div class="statusbar">
-      <div class="connection-dot" :class="{ connected: isConnected, disconnected: !isConnected  }"></div>
+      <div class="connection-dot" :class="{ connected: store.isConnected, disconnected: !store.isConnected  }"></div>
       <small>J. Zimmer Maschinenbau GmbH</small>
     </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { useWebSocketStore } from '../stores/websocket';
-
+import { useWebSocketStore } from '../stores/useWebSocketStore';
 const store = useWebSocketStore();
-let isConnected = ref(false);
-
-watch(() => store.connected, (newVal) => {
-    isConnected.value = newVal;
-});
 </script>
 
 <style>

@@ -31,7 +31,7 @@ import { ref, computed, onMounted } from 'vue';
 import { faBatteryFull, faBatteryThreeQuarters, faBatteryHalf, faBatteryEmpty, faWifi, faUserLarge, faUserLargeSlash } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { useWebSocketStore } from '../stores/websocket';
+import { useWebSocketStore } from '../stores/useWebSocketStore';
 import { useCredentialStore } from '../stores/useCredentialStore';
 import { useMenuStore } from '../stores/useMenuStore';
 
@@ -42,7 +42,9 @@ const creds = useCredentialStore();
 const menu = useMenuStore();
 
 const batteryInfo = ref(0);
-const wlanInfo = ref(0);
+const batteryStatus = ref(0);
+
+const wlanSignal = ref(0);
 
 const batteryIcon = computed(() => {
   if (batteryInfo.value >= 75) {
@@ -63,12 +65,12 @@ const wifiIcon = computed(() => {
 const wifiStyle = computed(() => {
   
   let color;
-  if (wlanInfo.value >= 75) {
-    color = 'green'; 
-  } else if (wlanInfo.value >= 50) {
-    color = 'yellow'; 
-  } else if (wlanInfo.value >= 25) {
+  if (wlanSignal.value >= 75) {
     color = 'white'; 
+  } else if (wlanSignal.value >= 50) {
+    color = 'lightgreen'; 
+  } else if (wlanSignal.value >= 25) {
+    color = 'yellow'; 
   } else {
     color = 'red'; 
   }
@@ -97,8 +99,10 @@ onMounted(() => {
   store.onMessage = (message) => {
     try {
       if (message.Action === 'deviceInfo') {
-        batteryInfo.value = message.Data.battery;
-        wlanInfo.value = message.Data.wlan;
+        batteryInfo.value = message.Data.battery.EstimatedChargeRemaining;
+        batteryStatus.value = message.Data.battery.BatteryStatus;
+
+        wlanSignal.value = message.Data.wlan.signal;
       }
     } catch {}
   };
