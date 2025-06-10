@@ -1,9 +1,9 @@
 {
     "mssql" : {
-        "host" : "srv-sql-2\\asuterp",
-        "db" : "Zimmer_Prod",
-        "user" : "sa",
-        "pass" : "TpuQ91gh"
+        "host" : "********",
+        "db" : "********",
+        "user" : "********",
+        "pass" : "********"
     },
     "serialvendors": [
         {
